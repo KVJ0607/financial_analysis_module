@@ -1,5 +1,5 @@
-from ....date_utils.dateRepresentation import DateRepresentation
-from ..data_point import DataPoint
+from date_utils.dateRepresentation import DateRepresentation
+from point.dataPoint import DataPoint
 
         
 class NoneDataPoint(DataPoint): 

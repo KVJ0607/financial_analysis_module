@@ -1,5 +1,5 @@
-from ....date_utils import dateRepresentation
-from ..data_point import DataPoint
+from date_utils import dateRepresentation
+from point.dataPoint import DataPoint
 
 class CarNDataPoint(DataPoint): 
     _enum = ['previousDate','followingDate','cumulativeAbnormalReturn','intervalN'] 

@@ -1,7 +1,7 @@
 import datetime
 
-from ..date_utils.dateRepresentation import DateRepresentation
-from ..date_utils.nullDateRepresentation import NullDateRepresentation
+from .dateRepresentation import DateRepresentation
+from .nullDateRepresentation import NullDateRepresentation
 
 
 

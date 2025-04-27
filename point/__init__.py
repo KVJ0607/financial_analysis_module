@@ -28,7 +28,7 @@ company.
 '''
 
 
-from .data_point import DataPoint
+from .dataPoint import DataPoint
 from .point_imp.carNDataPoint import CarNDataPoint
 from .point_imp.historicalDataPoint import HistoricalDataPoint,PricingDataPoint,AdjClosedDataPoint,NewsNewsDataPoint
 from .point_imp.NoneDataPoint import NoneDataPoint

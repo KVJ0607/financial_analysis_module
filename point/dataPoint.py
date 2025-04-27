@@ -1,6 +1,6 @@
 from abc import ABC,abstractmethod
 
-from ..date_utils.dateRepresentation import DateRepresentation
+from date_utils.dateRepresentation import DateRepresentation
 
 
 class DataPoint(ABC):        
@@ -8,13 +8,12 @@ class DataPoint(ABC):
     def __str__(self): 
         return str(self.mapping)
 
-    
     @property
     @abstractmethod
     def date(self)->DateRepresentation:
         pass
     
-    @property            
+    @property                
     @abstractmethod
     def mapping(self)->map:    
         '''Return a map[attribute,data figures]'''     
@@ -46,8 +45,7 @@ class DataPoint(ABC):
     def getCoordinateFrom(cls)->str: 
         pass 
     
-        
-    @classmethod
+    @classmethod    
     @abstractmethod
     def comparable(cls,*arg)->bool: 
         '''Return if they have the same coordinate'''

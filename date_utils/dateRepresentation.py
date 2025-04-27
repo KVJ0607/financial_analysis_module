@@ -77,20 +77,20 @@ class DateRepresentation(ABC):
     @classmethod
     def getInstance(cls,dateObj):
         for subClasses in cls.__subclasses__():
-            if subClasses.__name__() == 'DateRepresentationImp': 
-                return subClasses.__init__(dateObj)
+            if subClasses.__name__ == 'DateRepresentationImp': 
+                return subClasses(dateObj)
     
     @classmethod
     def getInstanceOfNullDate(cls): 
         for subClasses in cls.__subclasses__():
-            if subClasses.__name__() == 'NullDateRepresentation': 
-                return subClasses.__init__()
+            if subClasses.__name__ == 'NullDateRepresentation': 
+                return subClasses()
 
     @classmethod
     def getInstanceOfAlwaysGreaterDate(cls): 
         for subClasses in cls.__subclasses__():
-            if subClasses.__name__() == 'AlwaysGreaterDateRepresentation': 
-                return subClasses.__init__()            
+            if subClasses.__name__ == 'AlwaysGreaterDateRepresentation': 
+                return subClasses()            
 
         
         

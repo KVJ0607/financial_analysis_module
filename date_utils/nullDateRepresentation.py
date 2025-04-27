@@ -1,14 +1,14 @@
 
 from datetime import date
 
-from ..date_utils.dateRepresentation import DateRepresentation
+from .dateRepresentation import DateRepresentation
 
 
 
 class NullDateRepresentation(DateRepresentation):                 
     
     def __init__(self):
-        pass 
+        self.__create = True
     
     def __lt__(self,other):
         self._raiseComparisonError(other)

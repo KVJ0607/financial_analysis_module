@@ -68,14 +68,14 @@ class ShareEntity(ABC):
             joinedEntities.append(cls.createShareCode(i_code))
             
         return JoinedShareEntity(joinedEntities)
-        
-    @abstractmethod                        
-    @classmethod
+    
+    @classmethod        
+    @abstractmethod                                    
     def validableCode(cls,inputStr)->bool:
         pass
     
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def validifyCode(cls,inputStr)->str: 
         pass 
                              

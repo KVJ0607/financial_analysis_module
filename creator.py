@@ -5,22 +5,21 @@
 
 from abc import ABC,abstractmethod
 import csv
-
-from . import date_utils
-from .point import NoneDataPoint,PricingDataPoint,NewsNewsDataPoint
-from .collection import DataCollection
-from .shareEntity import ShareEntity
+import date_utils
+from point import NoneDataPoint,PricingDataPoint,NewsNewsDataPoint
+from financial_analysis.dataCollection import DataCollection
+from shareEntity import ShareEntity
 
 class Creator(ABC): 
     
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def getInstacnefrom(cls,fileName=str)->DataCollection:
         pass 
         
     
 
-class ConcreteCreatorPricingCollection(Creator): 
+class PricingCollectionCreator(Creator): 
     _enum = ['date','open','high','low','close','adjClose','volume']
     
     
@@ -29,9 +28,9 @@ class ConcreteCreatorPricingCollection(Creator):
         return cls.getInstacnefromCsv(fileName)
     
     @classmethod
-    def getInstacnefromCsv(cls,fileName=str,isHeading=True,shareCode='',dateIndex=1,
-                           openIndex=2,highIndex=3,lowIndex=4,closeIndex=5,
-                           AdjCloseIndex=6,volumnIndex=7):
+    def getInstacnefromCsv(cls,fileName=str,isHeading=True,shareCode='',dateIndex=0,
+                           openIndex=1,highIndex=2,lowIndex=3,closeIndex=4,
+                           AdjCloseIndex=5,volumnIndex=6):
         "fileName: a csv file with the date,open,high,low,close,adjClose,volume"
         collections = []
         with open(fileName,mode='r') as infile: 
@@ -55,7 +54,7 @@ class ConcreteCreatorPricingCollection(Creator):
         return DataCollection(collections,shareEntity)
 
     @classmethod
-    def _getKeyList(cls,dateIndex,openIndex,highIndex,lowIndex,closeIndex,AdjCloseIndex,volumnIndex):
+    def _getKeyList(cls,dateIndex,openIndex,highIndex,lowIndex,closeIndex,AdjCloseIndex,volumnIndex)->list[str]:
         keyList =['']*7
         keyList[dateIndex] = cls._enum[0]
         keyList[openIndex] = cls._enum[1]
@@ -64,12 +63,13 @@ class ConcreteCreatorPricingCollection(Creator):
         keyList[closeIndex] = cls._enum[4]
         keyList[AdjCloseIndex] = cls._enum[5]
         keyList[volumnIndex] = cls._enum[6]
+        return keyList
                 
                     
                 
                 
 
-class ConcreteCreatorNewsCollection(Creator): 
+class NewsCollectionCreator(Creator): 
     _enum = ['date','siteAddress','sentimentalScore']
 
     @classmethod
