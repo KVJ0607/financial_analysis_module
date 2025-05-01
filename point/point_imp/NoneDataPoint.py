@@ -1,4 +1,5 @@
-from date_utils.dateRepresentation import DateRepresentation
+
+from date_utils import DateRepresentation
 from point.dataPoint import DataPoint
 
         
@@ -7,7 +8,7 @@ class NoneDataPoint(DataPoint):
     A special class that represent the absent of market day 
     '''
     def __init__(self,date):
-        self.__date = DateRepresentation.getInstance(date)
+        self.__date = DateRepresentation(date)
 
 
     @property
@@ -18,7 +19,7 @@ class NoneDataPoint(DataPoint):
     def mapping(self):
         return {}
         
-    def getDataValueWithAttribute(self, attribute):
+    def getValueWithAttribute(self, attribute):
         '''Expect it to pass an error'''        
         return self.mapping[attribute]    
 
@@ -35,6 +36,6 @@ class NoneDataPoint(DataPoint):
         return ''
     
     @classmethod
-    def comparable(cls):
+    def equivalent(cls):
         return False
     

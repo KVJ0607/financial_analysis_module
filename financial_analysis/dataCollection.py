@@ -1,66 +1,33 @@
 from __future__ import annotations
 
-from abc import ABC,abstractmethod
-from collections.abc import Mapping
-from typing import Tuple, Type
+from abc import ABC, abstractmethod
+from collections.abc import Mapping,Callable
+from typing import Type
 
 from shareEntity import ShareEntity
-from point import DataPoint,NoneDataPoint,CarNDataPoint,NoneDataPoint,NewsNewsDataPoint,HistoricalDataPoint
-from date_utils.dateRepresentation import DateRepresentation
+from point import DataPoint,NoneDataPoint,CarNDataPoint,NoneDataPoint,NewsNewsDataPoint,HistoricalDataPoint,PricingDataPoint
+import date_utils
+from .utils.reorderOperand import ReorderOperand
 
 
 
 
-class DataCollection:  
+class CollectionGroup:  
     """Collection of DataPoint of the same implementation type"""       
+
+
     def __init__(
-        self,dataPoints:list[DataPoint],
+        self,
+        dataPoints:list[DataPoint],
         shareCode:ShareEntity|str =None):
         
-        self.__notSamePointType_RaiseError(dataPoints)                                
-        
-        self.dataPoints = dataPoints
+        self.initCayleyTable()
+        self.updateCayleyTable(dataPoints)                              
+    
         self.shareEntity = shareCode
         
-        self.__interacted = False
-        self.__containNewWindow =False
-
+         
     
-    @property
-    def pointType(self)->Type[DataPoint]:     
-        firstDataPoint = next(iter(self.__dataPoints.values()))
-        return type(firstDataPoint)    
-    
-    
-    @property 
-    def coordinates(self)->set:
-        if self.__interacted: 
-            return self.__interactedCoordinates
-        else:
-            return set(self.__dataPoints.keys())
-
-
-    @property
-    def dataPoints(self)->Mapping[str,DataPoint] | DataCollection: 
-        if self.__interacted and self.__containNewWindow:
-            return self.newWindow 
-        elif self.__interacted and not self.__containNewWindow:
-            return {key:value for key,value in self.__dataPoints 
-                if key in self.interactedCoordinates}            
-        else:
-            return self.__dataPoints        
-    
-    @dataPoints.setter
-    def dataPoints(self,rawDataPointList:list[DataPoint]):
-        self.__dataPoints = self._getValidCollectionMap(rawDataPointList)
-                    
-
-    @property
-    def uninteractedDataPoint(self)->Mapping[str,DataPoint]:
-        return self.__dataPoints
-    
-    def __setValidDataPoint(self,DataPointList:list[DataPoint]):
-        self.__dataPoints = DataPointList
     
     
     @property
@@ -83,107 +50,90 @@ class DataCollection:
                 
 
     @property
-    def newWindow(self)->'DataCollection':
-        if self.__containNewWindow:
-            return self.__newWindow
-        else: 
-            return self
+    def cayleyTable(self)->Mapping[str,'CollectionGroup']:
+        return self.__cayleyTable
     
-    @newWindow.setter
-    def newWindow(self,val:'DataCollection'): 
-        self.__interacted = True
-        self.__containNewWindow = True
-        self.__newWindow = val
-    
-    @property
-    def interactedCoordinates(self)->set[str]:         
-        if self.__interacted: 
-            return self.__interactedCoordinates
-        else: 
-            return set(self.__dataPoints.keys())
-    
-    @interactedCoordinates.setter
-    def interactedCoordinates(self,coor:list[str]): 
-        #Added an extra step ensure the coordinates intersection 
-        #is a subset of the instance's coordinates
-        oldFlag = self.__interacted
-        try:
-            self.__interactedCoordinates = set.intersection(
-                set(coor),set(self.dataPoints.keys()))
-            self.__interacted = True
-        except Exception as e: 
-            self.__interacted = oldFlag
-            raise e 
-    
-        
-    
-    def getDataPointFromCoordinate(self, coordinate:str)->DataPoint:
-        return self.dataPoints[coordinate]    
-    
+                
+    def initCayleyTable(self):
+        cayleyTable = {}
+        for iType in DataPoint.__subclasses__(): 
+            cayleyTable[iType.__name__] = None
+        self.__cayleyTable = cayleyTable
 
-    def joinWithoutOverWrite(self,*args):
+    def updateCayleyTable(self,element:list[DataPoint]):
         """
-        args: collections of the same point type and the same share 
-        It update the collection with collections in the args, 
-        while keep the arg collections unchanged        
+        Update the look up table with the data collection
         """
-        try:
-            self.__samePointType(args)
-            self.__sameShareEntity(args)
-        except(CollectionsNotHomogeneousError): 
-            raise ValueError("""The arguments have to be a list of 
-                DataCollection of the same pointType attribute""")        
         
-        newData = map()
-        foundKeys = set()
-        for iColl in args: 
-            iColl:DataCollection
-            if len(foundKeys) == 0: 
-                foundKeys = iColl.coordinates
-                newData = iColl.dataPoints
-            else: 
-                for jCoor in iColl.coordinates.difference(foundKeys): 
-                    newData[jCoor] = iColl.getDataPointFromCoordinate(jCoor)
-                    foundKeys.add(jCoor)
-        self.__setValidDataPoint(newData)
+        thisElementClass = self.__returnElementClass_OrRaiseError(element).__name__
+        
+        if thisElementClass in self.__cayleyTable: 
+            self.__cayleyTable[thisElementClass] = element
+        else: 
+            raise ValueError(f"The class {thisElementClass} doesn't belong to the group")
+            
+    def containElement(self,eleClass:Type[DataPoint])->bool:
+        """
+        Check if the collection group contain the element
+        """
+        if eleClass.__name__ in self.__cayleyTable: 
+            return True
+        else: 
+            return False        
+        
+    def getElement(self,eleClass:Type[DataPoint])->list[DataPoint]:        
+        """
+        Get the element of the collection group
+        """
+        if eleClass.__name__ in self.__cayleyTable: 
+            return self.__cayleyTable[eleClass.__name__]
+        else: 
+            raise ValueError(f"The point type {eleClass.__name__} is not in the look up table")
     
-    def joinWithOverWrite(self,*args):
-        """
-        args: collections of the same point type and the same share 
-        It update the collection with collections in the args, 
-        while keep the arg collections unchanged        
-        """        
-        self.__samePointType(args)
-        self.__sameShareEntity(args)
-        
-        newData = map()
-        foundKeys = set()
-        for iColl in args: 
-            iColl:DataCollection
-            if len(foundKeys) == 0: 
-                foundKeys = iColl.coordinates
-                newData = iColl.dataPoints
-            else: 
-                for jCoor in iColl.coordinates: 
-                    newData[jCoor] = iColl.getDataPointFromCoordinate(jCoor)
-                    foundKeys.add(jCoor)
-        self.__setValidDataPoint(newData)                    
+    
+                     
 
-                    
+    def convertToCarNColl(self,nDay:int=3): 
+        if self.pointType != PricingDataPoint:
+            raise TypeError(f"Only DataCollection of type{PricingDataPoint.__name__} but not {self.pointType.__name__}")
+        if nDay//2 == 0: 
+            raise ValueError("nDay should be an odd number")
+        if nDay < 1: 
+            raise ValueError("nDay should be a positive number")
+        nDay = (nDay-1)/2 
+            
+        
+        dateList = self.dates
+        dateList = sorted(dateList)
+        
+        carNPoints:list[CarNDataPoint] = [] 
+        for iDay in date_utils.DateRepresentation.getDateRange(dateList[1],dateList[-1]):
+            if iDay+nDay in dateList and iDay-nDay in dateList:
+                lastPoint:PricingDataPoint = self.getPointFromElement(PricingDataPoint.getCoordinateFrom(iDay-nDay))
+                nextPoint:PricingDataPoint = self.getPointFromElement(PricingDataPoint.getCoordinateFrom(iDay+nDay))
+                carNPoints.append(CarNDataPoint(
+                    iDay,
+                    iDay-nDay,
+                    iDay+nDay,
+                    (nextPoint.adjClose-lastPoint.adjClose)/lastPoint.adjClose,
+                    nDay)
+                )
+        self.updateCayleyTable(CollectionGroup(carNPoints,self.shareEntity))
+        
     
     def interact(
                 self,*args,
                 clearPreviousInersection = False):
         
-        homoSet = self.getHomoColls(*args)
+        homoSet = self.__getHomoColls(*args)
         hetroSet = set(args).difference(homoSet)    
-        self.interactHomo(homoSet,clearPreviousInersection=clearPreviousInersection)
+        self.__interactHomo(homoSet,clearPreviousInersection=clearPreviousInersection)
         for iColl in hetroSet:
-            iColl:DataCollection
-            self.interactHetro(iColl)
+            iColl:CollectionGroup
+            self.__interactHetro(iColl)
             
             
-    def interactHomo(self,homoSet:list[DataCollection],
+    def __interactHomo(self,homoSet:list[CollectionGroup],
             clearPreviousInersection = False):        
         try:
             self.__samePointType(homoSet)
@@ -202,41 +152,44 @@ class DataCollection:
         self.interactedCoordinates = interactedCoordinates
         
     
-    def interactHetro(
-            self,operant:'DataCollection'):                
-        signature = self.getSignatureFromDuoCollection(operant,self)  
+    def __interactHetroOld(
+            self,operant:'CollectionGroup'):                
+        signature = self.__getSignatureFromDuoCollection(operant,self)  
         found = False 
         for subcls in HeterogCollectionOperator.__subclasses__(): 
-            if signature == subcls.signature():       
-                found = True
-                print(f"Found {signature} and {subcls.signature}")
-                if subcls.needNewWindow():                                                 
-                    self.newWindow = subcls.createNewWindow(operant,self)
-                else: 
-                    subcls.interact(operant,self)  
+            if subcls.match(signature):       
+                found = True                
+                matchedOperator = subcls.getMatchingOperator(operant,self,signature) ## abstract away
+                self.updateCayleyTable(matchedOperator(operant,self))
             if not found:      
-                print(f"Warning: No operator is defined for {signature} and {subcls.signature}")   
+                print(f"Warning: No operator is defined for {signature}")   
+
+    def __interactHetro(
+            self,operant:'CollectionGroup'):                
+        found = False 
+        for subcls in HeterogCollectionOperator.__subclasses__(): 
+            if subcls.match(self,operant):       
+                found = True                                                
+                self.updateCayleyTable(
+                    subcls.dot(operant,self)
+                )
+            if not found:      
+                print(f"Warning: No operator is defined for {self.pointType.__name__} and {operant.pointType.__name__}")                   
     
-    def getHomoColls(self,*args)->list[DataCollection]:                
+    def __getHomoColls(self,*args)->list[CollectionGroup]:                
         homoSet = list()
         for iColl in args:
-            iColl:DataCollection
+            iColl:CollectionGroup
             if iColl.pointType == self.pointType:
                 homoSet.append(iColl)
         return homoSet
     
-    
-    @staticmethod
-    def cloneNewWindow(collections:list['DataCollection']):
-        targetWindow = collections[0].newWindow
-        for iColl in collections[1:]: 
-            iColl:DataCollection            
-            iColl.newWindow = targetWindow
+
     
     
     @staticmethod 
-    def getSignatureFromDuoCollection(
-            collectionA:'DataCollection',collectionB:'DataCollection'): 
+    def __getSignatureFromDuoCollection(
+            collectionA:'CollectionGroup',collectionB:'CollectionGroup'): 
         """Provide a signature used to get the corresponding 
         class for the binary operation. 
         collectionA, collectionB are two data collection 
@@ -246,13 +199,13 @@ class DataCollection:
     
     
     @staticmethod 
-    def clearPreviousInersection(collections:list[DataCollection]): 
+    def clearPreviousInersection(collections:list[CollectionGroup]): 
         for iColl in collections: 
             iColl.__interacted = False
             
 
     @staticmethod
-    def __samePointType(collections:list[DataCollection])->bool:
+    def __samePointType(collections:list[CollectionGroup])->bool:
         pointType = collections[0].pointType
         for iColl in collections: 
             if iColl.pointType != pointType: 
@@ -261,7 +214,7 @@ class DataCollection:
     
     @staticmethod
     def __sameShareEntity(*args)->bool: 
-        inputColls: list[DataCollection]
+        inputColls: list[CollectionGroup]
         inputColls = list(args)
         shareEntity = inputColls[0].shareEntity
         for iColls in inputColls: 
@@ -270,14 +223,15 @@ class DataCollection:
         return True 
     
     @staticmethod
-    def __notSamePointType_RaiseError(datapoints:list[DataPoint])->bool: 
+    def __returnElementClass_OrRaiseError(datapoints:list[DataPoint])->bool: 
         if len(datapoints) == 0: 
             raise PointTypeInconsistentError()
-        pointType = type(datapoints[0])
+        
+        correctType = type(datapoints[0])
         for currPoiunt in datapoints: 
-            if type(currPoiunt) != pointType: 
-                return False
-        return True
+            if type(currPoiunt) != correctType: 
+                raise PointTypeInconsistentError()
+
 
 
     
@@ -285,16 +239,19 @@ class DataCollection:
     @classmethod
     def _getValidCollectionMap(cls,dataPoints:list[DataPoint])->Mapping[str,DataPoint]:        
         completeMap = {}
-        if len(dataPoints) == 0:             
+        if len(dataPoints) == 0:     
+            print("Warning: The collection is empty")        
             return {}
-        pointType = type(dataPoints[0])
+        pointType = NoneDataPoint
         for currentDataPoint in dataPoints: 
-            if pointType != type(currentDataPoint): 
-                raise PointTypeInconsistentError()
-            if currentDataPoint.valid():
+            if pointType == NoneDataPoint: 
+                pointType = type(currentDataPoint)
+            elif pointType != type(currentDataPoint): 
+                raise PointTypeInconsistentError()            
+            elif currentDataPoint.valid():
                 #If there is two dataPoint with the same coordinate,
                 #the latter one with overwrite the former one
-                completeMap[currentDataPoint.coordinate] = currentDataPoint              
+                completeMap[currentDataPoint.coordinate] = currentDataPoint  
         return completeMap                
             
 
@@ -336,119 +293,110 @@ class HeterogCollectionOperator(ABC) :
     having different pointType attribute.
     """
     
-    __leftOperand = NoneDataPoint
-    __rightOperand = NoneDataPoint
     
     @classmethod
     @abstractmethod
-    def needNewWindow(cls)->bool: 
+    def match(
+        cls,
+        operandA:CollectionGroup,
+        operandB:CollectionGroup)->bool: 
+        """
+        Check if the two DataCollection are compatible 
+        for the operator. 
+        """
         pass
     
+    
     @classmethod
-    @abstractmethod        
-    def signature(cls)->set: 
+    @abstractmethod
+    def dot(
+        cls,
+        leftOperand:CollectionGroup,
+        rightOperand:CollectionGroup)->CollectionGroup:
+        """
+        The dot method is a classmethod that acts as a operator 
+        ofdataCollections  group. It will return a new
+        DataCollection with the result of the operation.
+        """
         pass
     
-    @classmethod        
-    @abstractmethod
-    def interact(
-        cls,operandA:DataCollection,
-        operandB:DataCollection)->DataCollection: 
-        """
-        Interact the two DataCollection according 
-        to the logic for their point type.
-        
-        """        
-        pass 
-    
-    @classmethod    
-    @abstractmethod
-    def createNewWindow(
-            cls,operandA:DataCollection,
-            operandB:DataCollection)->DataCollection: 
-        """
-        output a new DataCollection using a function 
-        according to their point type.
-        
-        """
-        pass 
-    
-    
-
-    
-    @classmethod
-    def __getLeftOperandPointType(cls)->Type[DataPoint]: 
-        '''
-        Built to meet the non-communcative property.
-        Raise error if not implemented
-        '''        
-        raise NotImplementedError ("left operand is not implemented")
-        
-    
-    @classmethod
-    def __getRightOperandPointType(cls)->Type[DataPoint]:  
-        '''
-        Built to meet the non-communcative property.
-        Raise error if not implemented
-        '''        
-        raise NotImplementedError ("right operand is not implemented")
-        
-    
-    @classmethod
-    def __matchingOperand(cls,
-                        leftInputCollection:DataCollection,
-                        rightInputCollection:DataCollection)->tuple[DataCollection]: 
-        """
-        All opertors are implictly non-communicative and are only defined for 
-        a specified ordered. This method take two operands and return 
-        them in a required oreder in a tuple.      
-        """
-        leftOperandType = cls.__getLeftOperandPointType()
-        rightOperandType = cls.__getRightOperandPointType()
-        leftInputType = leftInputCollection.pointType
-        rightInputType = leftInputCollection.pointType
-        
-        if leftInputType == leftOperandType and rightInputType == rightOperandType: 
-            return leftInputCollection,rightInputCollection
-        elif rightInputType == leftOperandType and leftInputType == rightOperandType: 
-            return rightInputCollection,leftInputCollection
-        else: 
-            raise TypeError(f'''The two input should be of types {leftOperandType} and {rightOperandType}.
-                            However, the arugments are of types {leftInputType} and {rightInputType}''')
     
 class CarNewsOperators(HeterogCollectionOperator): 
     """
     A class that provide a classmethod that acts as a operator between dataCollections 
-    with cars and news data points.
-
-    
+    with cars and news data points.    
     """
-    __leftOperand = CarNDataPoint 
-    __rightOperand = NewsNewsDataPoint
     
-    @classmethod
-    def needNewWindow(cls)->bool: 
-        return True
     
-    @classmethod
-    def signature(cls)->set: 
-        return set([CarNDataPoint.__name__,NewsNewsDataPoint.__name__])          
     
-    @classmethod
-    def interact(cls): 
-        pass 
     
-    @classmethod
-    def createNewWindow(cls, leftOperand:DataCollection,
-             rightOperand:DataCollection) -> DataCollection:
-        carCollection: DataCollection
-        newsCollection: DataCollection
+    def __init__(self,gEleA:CollectionGroup,
+                 gEleB:CollectionGroup):
         
-        carCollection,newsCollection = cls.__matchingOperand(leftOperand,rightOperand)        
+        if self.match(gEleA,gEleB):
+            if gEleA.pointType == CarNDataPoint:
+                self.carNEle = gEleA
+            elif gEleA.pointType == NewsNewsDataPoint:
+                self.newsEle = gEleA
+            else: 
+                self.pricingEle = gEleA
+            if gEleB.pointType == CarNDataPoint:
+                self.carNEle = gEleB
+            elif gEleB.pointType == NewsNewsDataPoint:
+                self.newsEle = gEleB
+            else:
+                self.pricingEle = gEleB
+        
+        
+
+    @classmethod
+    def match(
+        cls,
+        gEleA:CollectionGroup,
+        gEleB:CollectionGroup)->bool:
+        eSignature = set(gEleA.pointType.__name__,gEleB.pointType.__name__)
+        for iSignature in cls.signature(): 
+            if iSignature == eSignature: 
+                return True
+        return False
+    
+    
+    @classmethod
+    def dot(
+        cls,
+        gEleA:CollectionGroup,
+        gEleB:CollectionGroup,
+        )->Callable[[CollectionGroup,CollectionGroup],CollectionGroup]: 
+        thisOperator = CarNewsOperators(gEleA,gEleB)
+        eSignature = set(gEleA.pointType.__name__,gEleB.pointType.__name__)    
+        for iSignature in cls.signature():
+            if iSignature == eSignature: 
+                if eSignature == set(set([CarNDataPoint.__name__,NewsNewsDataPoint.__name__])):
+                    return thisOperator.__defaultOperator()    
+                elif eSignature == set([PricingDataPoint.__name__,NewsNewsDataPoint.__name__]):
+                    return thisOperator.__pricingOperator()
+                
+            
+        
+    
+    @classmethod
+    def signature(cls)->list[set]: 
+        signatures = []
+        signatures.append(set([CarNDataPoint.__name__,NewsNewsDataPoint.__name__]))
+        signatures.append(set([PricingDataPoint.__name__,NewsNewsDataPoint.__name__]))
+        return signatures
+    
+    
+    
+    def __defaultOperator(self) -> CollectionGroup:        
+        
+        carEle:CollectionGroup = self.carNEle
+        newsEle:CollectionGroup = self.newsEle
+                
         
         carNewsDataPoints = []
         
-        for carCoordinate,carPoint in carCollection.dataPoints: 
+        for carCoordinate,carPoint in carEle.dataPoints: 
             carCoordinate:str
             carPoint:CarNDataPoint
             
@@ -457,14 +405,20 @@ class CarNewsOperators(HeterogCollectionOperator):
             carDate = carPoint.date
                  
             accumlatedSentimentalScore = 0                    
-            for iTime in DateRepresentation.getListOfDateStrWithinTwoDates(previousDate,followingDate): 
-                iDataPoint = newsCollection.getDataPointFromCoordinate(NewsNewsDataPoint.getCoordinateFrom(iTime))
-                accumlatedSentimentalScore += iDataPoint.getDataValueWithAttribute(NewsNewsDataPoint.enum()[1])
+            for iTime in date_utils.DateRepresentation.getDateRange(previousDate,followingDate): 
+                iDataPoint = newsEle.getPointFromElement(NewsNewsDataPoint.getCoordinateFrom(iTime))
+                accumlatedSentimentalScore += iDataPoint.getValueWithAttribute(NewsNewsDataPoint.enum()[1])
                 
             attriList = ['sentimentalScore']                
             carNewsDataPoints.append(HistoricalDataPoint(carDate,attriList,[accumlatedSentimentalScore],attriList))
         
-        return DataCollection(carNewsDataPoints,carCollection.shareEntity)     
+        return CollectionGroup(carNewsDataPoints,carEle.shareEntity)     
+    
+    
+    def __pricingOperator(self)->CollectionGroup: 
+        self.carNEle:CollectionGroup = self.pricingEle.convertToCarNColl()
             
+
+        
         
                  

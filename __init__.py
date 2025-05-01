@@ -13,9 +13,9 @@ This module provide a base for future development according to the needs of fian
 
 
 from .shareEntity import ShareEntity
-from .financial_analysis.dataCollection import DataCollection
+from .financial_analysis.dataCollection import CollectionGroup
 from .creator import PricingCollectionCreator,NewsCollectionCreator,Creator
 
 
-__all__ = [ShareEntity,DataCollection,Creator,PricingCollectionCreator,NewsCollectionCreator]
+__all__ = [ShareEntity,CollectionGroup,Creator,PricingCollectionCreator,NewsCollectionCreator]
 

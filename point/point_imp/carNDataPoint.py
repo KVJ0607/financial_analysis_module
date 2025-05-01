@@ -1,91 +1,109 @@
-from date_utils import dateRepresentation
-from point.dataPoint import DataPoint
+from date_utils import DateRepresentation
+from point.dataPoint import DataPoint,GroupElement
 
-class CarNDataPoint(DataPoint): 
-    _enum = ['previousDate','followingDate','cumulativeAbnormalReturn','intervalN'] 
-    
+class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
 
-        self.__date = dateRepresentation.DateRepresentation(date)
-        self.__previousDate = dateRepresentation.DateRepresentation(previousDate)
-        self.__followingDate = dateRepresentation.DateRepresentation(followingDate)
+        self.__date = DateRepresentation(date)
+        self.__previousDate = DateRepresentation(previousDate)
+        self.__followingDate = DateRepresentation(followingDate)
         self.__cumulativeAbnormalReturn = cumulativeAbnormalReturn
         self.__intervalN = intervalN
 
     
     @property
-    def date(self)->dateRepresentation.DateRepresentation:
+    def date(self)->DateRepresentation:
         return self.__date
-    # @date.setter
-    # def date(self,date): 
-    #     self.__date = dateRepresentation.DateRepresentation.getInstance(date)
             
     @property
-    def previousDate(self)->dateRepresentation.DateRepresentation:
+    def previousDate(self)->DateRepresentation:
         return self.__previousDate    
-    # @previousDate.setter
-    # def previousDate(self,date): 
-    #     self.__previousDate = dateRepresentation.DateRepresentation(date)
         
     @property
-    def followingDate(self)->dateRepresentation.DateRepresentation: 
+    def followingDate(self)->DateRepresentation: 
         return self.__followingDate        
-    # @followingDate.setter
-    # def followingDate(self,date):
-    #     self.__followingDate = dateRepresentation.DateRepresentation(date)
-
+    
     @property
     def cumulativeAbnormalReturn(self)->float: 
         return self.__cumulativeAbnormalReturn
 
-    
     @property
-    def mapping(self)->map:                         
-        mAttri = self.getEnum()
-        mVal = [self.__previousDate,self.__followingDate,self.__cumulativeAbnormalReturn,self.__intervalN] 
-        return dict(zip(mAttri,mVal))
+    def intervalN(self)->int: 
+        return self.__intervalN
         
     @property
     def coordinate(self)->str:
         return self.getCoordinateFrom(self.__previousDate,self.__date,self.__followingDate)
-
-
-
-    def getDataValueWithAttribute(self,attribute:str): 
-        return self.mapping[attribute]
          
         
     def valid(self)->bool:  
-        attributeStr = self.getEnum()[2]
-        return  self.getDataValueWithAttribute(attributeStr) is not None 
+        validA = DateRepresentation.isValid(self.__date)
+        validB = DateRepresentation.isValid(self.__previousDate)
+        validC = DateRepresentation.isValid(self.__followingDate)
+        validD = isinstance(self.__cumulativeAbnormalReturn,(int,float))
+        validE = (isinstance(self.__intervalN,int) 
+                    and self.__intervalN > 2 
+                    and self.__intervalN//2 == 1)
+        
+        if validA and validB and validC and validD and validE:
+            return  True
+        else:
+            return False
     
     
     
     @classmethod
-    def getCoordinateFrom(cls,previousDate:dateRepresentation.DateRepresentation,
-                         carDate:dateRepresentation.DateRepresentation,
-                         followingDate:dateRepresentation.DateRepresentation):
-        return 'p'+previousDate.standardFormat+'c'+carDate.standardFormat+'f'+followingDate.standardFormat
+    def getCoordinateFrom(
+        cls,
+        previousDate:DateRepresentation,
+        followingDate:DateRepresentation,
+        intervlN:int):
+        return ('p'+previousDate.standardFormat
+                +'f'+followingDate.standardFormat 
+                +'i'+str(intervlN))
         
     
     @classmethod
-    def comparable(cls, *arg)->bool:
-        preDateSet = set()
-        folDateSet = set()        
-        for carN in list(arg): 
-            carN: CarNDataPoint
-            preDateAttriStr = cls.getEnum()[0]
-            follDateAttriStr = cls.getEnum()[1]
-            preDateSet.add(carN.getDataValueWithAttribute(preDateAttriStr))
-            folDateSet.add(carN.getDataValueWithAttribute(follDateAttriStr))
-        return len(preDateSet) == 1 and len(folDateSet) == 1
+    def equivalent(cls, *arg)->bool:
+        coordinates = set()
+        
+        for iCar in list(arg): 
+            iCar: CarNDataPoint
+            coordinates.add(cls.getCoordinateFrom(
+                iCar.previousDate,
+                iCar.followingDate,
+                iCar.intervalN))
+            
+        return len(coordinates)==1
 
 
 
     @classmethod
-    def getEnum(cls):
-        return cls._enum
+    def getGroupElement(cls, points:list['CarNDataPoint']):
+        return CarNElement(points)
 
-
-
+            
+class CarNElement(GroupElement):
+    def __init__(self,points:list[CarNDataPoint]):
+        self.element = points        
+    
+    @property
+    def eleClass(self)->type[DataPoint]: 
+        return CarNDataPoint
+    
+    @property
+    def element(self)->list[CarNDataPoint]:
+        return self.__element
+    
+    @element.setter
+    def element(self,val:list[CarNDataPoint]): 
+        validPoints = []
+        for iPoint in val: 
+            if iPoint.valid() and isinstance(iPoint,CarNDataPoint):
+                validPoints.append(iPoint)
+        self.__element = validPoints
+            
+            
+    
+    
     

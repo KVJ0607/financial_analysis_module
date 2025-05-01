@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
 import datetime
 import re 
-from typing import Any, Callable
+from typing import Callable,Any
+
+
 
 
 
@@ -9,162 +10,264 @@ from typing import Any, Callable
 make conversion between different date string format and datetime.date format 
 standard format refer to yyyy-mm-dd
 '''
-class DateRepresentation(ABC): 
-    _dateTypeFlag = ['string in standard format','datetime.date']        
+class DateRepresentation: 
+    _dateTypeFlag = ['string in standard format','datetime.date','DateRepresentation']
     
-    @abstractmethod
-    def __lt__(self,other):
-        pass 
-    
-    @abstractmethod
-    def __le__(self,other):
-        pass       
-    
-    @abstractmethod        
-    def __gt__(self,other):
-        pass 
-    
-    @abstractmethod
-    def __ge__(self,other):
-        pass 
-    
-    @abstractmethod
-    def __eq__(self,other): 
-        pass 
-
-
+    def __init__(self,dateGeneric,nullDay:bool=False):     
+        
+        if nullDay:
+            self.__dateTimeDate = datetime.date(1,1,1)
+            self.__nullDay = True
+            return
+        
+        try:           
+            self.dateTimeDate = dateGeneric
+            self.__nullDay = False
+        except InvalidDateType as e:
+            self.__dateTimeDate = datetime.date(1,1,1)
+            self.__nullDay = True
+                
     @property
-    @abstractmethod
-    def standardFormat(self)->str:
-        pass 
-    
-    @property
-    @abstractmethod
     def dateTimeDate(self)->datetime.date:
-        pass  
+        return self.__dateTimeDate  
+    
+    @dateTimeDate.setter
+    def dateTimeDate(self,dateGeneric):
+        self.__dateTimeDate = self.toDateTimeDate(dateGeneric)        
+    
+    @property
+    def isNullDay(self)->bool:
+        return self.__nullDay    
+    
+
+    @property
+    def standardFormat(self)->str:        
+        return self._dateTimeToStandardFormat(self.__dateTimeDate)
+    
+    @property
+    def year(self)->int:
+        return self.dateTimeDate.year
+    @property
+    def month(self)->int:
+        return self.dateTimeDate.month
+    @property
+    def day(self)->int:
+        return self.dateTimeDate.day
 
         
-    @abstractmethod    
-    def isSupmiumDay(self)->bool:
-        pass 
+    def __add__(self, o:int):
+        if self.isNullDay: 
+            return self.getNullInstance()
+        return self.createNext_N_Day(o)    
+    def __sub__(self, o:int):
+        if self.isNullDay: 
+            return self.getNullInstance()
+        return self.createPrevious_N_Day(o)           
+    def __hash__(self):
+        return self.year*10000 + self.month*100 + self.day    
     
-    @abstractmethod
+    def __str__(self):
+        if self.isNullDay: 
+            return 'Null Day'
+        else:
+            return self.standardFormat
+    
+    def __lt__(self,other:'DateRepresentation'):
+        if self.isNullDay or other.isNullDay: 
+            raise
+        return self.dateTimeDate < other.dateTimeDate    
+        
+    def __le__(self,other:'DateRepresentation'):
+        if self.isNullDay or other.isNullDay: 
+            raise     
+        else: 
+            return self.dateTimeDate <= other.dateTimeDate                       
+        
+    def __gt__(self,other:'DateRepresentation'):        
+        if self.isNullDay or other.isNullDay: 
+            raise
+        return self.dateTimeDate > other.dateTimeDate    
+        
+    def __ge__(self,other:'DateRepresentation'):
+        if self.isNullDay or other.isNullDay: 
+            raise
+        return self.dateTimeDate >= other.dateTimeDate    
+        
+    def __eq__(self,other:'DateRepresentation'):         
+        if self.isNullDay or other.isNullDay: 
+            raise
+        return self.dateTimeDate == other.dateTimeDate
+        
+
+    @classmethod
+    def getNullInstance(cls)->'DateRepresentation':
+        return cls(datetime.date(1,1,1),True)    
+
+    
     def changeToNextDay(self):
-        pass     
-    
-    @abstractmethod 
+        self.changeToNext_N_Day(1)                        
+
     def changeToPreviousDay(self):
-        pass 
-
-    @abstractmethod 
-    def changeToPrevious_N_Day(self):
-        pass 
+        self.changeToNext_N_Day(-1)                        
         
-    @abstractmethod 
-    def changeToNext_N_Day(self):
-        pass 
-    
+    def changeToPrevious_N_Day(self,nDay):
+        self.changeToNext_N_Day(-nDay)
 
-    @abstractmethod
-    def createPrevious_N_Day(self,integer_N:int)->'DateRepresentation':
-        pass            
-    
-    @abstractmethod
+    def changeToNext_N_Day(self,nDay):
+        if self.isNullDay:
+            pass 
+        else:
+            mToday = self.dateTimeDate
+            mNewDay = mToday + datetime.timedelta(days=int(nDay))
+            self.__dateTimeDate = mNewDay            
+
+
+    def createPrevious_N_Day(self,integer_N:int):
+        return self.createNext_N_Day(-integer_N) 
+               
     def createNext_N_Day(self,integer_N:int)->'DateRepresentation':
-        pass 
+        if self.isNullDay:
+            return self.getNullInstance()
+        return DateRepresentation(self.dateTimeDate + datetime.timedelta(days=integer_N))
 
 
-    @classmethod
-    def getInstance(cls,dateObj):
-        for subClasses in cls.__subclasses__():
-            if subClasses.__name__ == 'DateRepresentationImp': 
-                return subClasses(dateObj)
     
     @classmethod
-    def getInstanceOfNullDate(cls): 
-        for subClasses in cls.__subclasses__():
-            if subClasses.__name__ == 'NullDateRepresentation': 
-                return subClasses()
+    def getDateRange(cls,startedDateIncluded,endDateInclueded)->list['DateRepresentation']:  
+        dateList = cls.getDateRangeInStr(startedDateIncluded, endDateInclueded)        
+        for i in range(len(dateList)):
+            dateList[i] = cls(dateList[i])                
+        return dateList
 
     @classmethod
-    def getInstanceOfAlwaysGreaterDate(cls): 
-        for subClasses in cls.__subclasses__():
-            if subClasses.__name__ == 'AlwaysGreaterDateRepresentation': 
-                return subClasses()            
+    def getDateRangeInStr(cls, startedDateIncluded, endDateInclueded)->list[str]:
+        startD = cls(startedDateIncluded)
+        endD = cls(endDateInclueded)   
+        dateList=[]
+        while startD <= endD:                        
+            dateList.append(startD.standardFormat)
+            startD.changeToNextDay()
+        return dateList
+        
+    @classmethod
+    def isValid(cls,dateObj): 
+        if isinstance(dateObj,cls):
+            return True
+        elif isinstance(dateObj,str) and cls.checkIfDateStandardFormat(dateObj):
+            return True
+        elif isinstance(dateObj,datetime.date):
+            return True
+        else:
+            return False
+    @staticmethod
+    def checkIfDateStandardFormat(dateString)->bool:
+        '''It checks if the string dateString is of 'yyyy-mm-dd' format    '''
+        datePatten = r'\d{4}-(?:\d{2}|\d{1})-(?:\d{2}|\d{1})'
+        return re.match(datePatten,dateString) 
+
+    @staticmethod    
+    def _raiseComparisonError():
+        raise NotImplementedError("Comparison operators are not supported for NullDateRepresentation")        
 
         
-        
-    @staticmethod
-    def toStandardFormat(dateObj)->str: 
-        dateTypeFlag = DateRepresentation._determineDateType(dateObj)
+    @classmethod
+    def toStandardFormat(cls,dateObj)->str: 
+        dateTypeFlag = cls._determineDateType(dateObj)
         if dateTypeFlag == None:             
              raise InvalidDateType("Invalid Date Type")
         else:
-            parsingFunction = DateRepresentation._getParsingFunctionToStandardFormat(dateTypeFlag)
+            parsingFunction = cls._getParsingFunctionToStandardFormat(dateTypeFlag)
             return parsingFunction(dateObj)              
-    @staticmethod
-    def toDateTimeDate(dateObj)->datetime.date:
-        dateTypeFlag = DateRepresentation._determineDateType(dateObj)
+        
+    @classmethod
+    def toDateTimeDate(cls,dateObj)->datetime.date:
+        dateTypeFlag = cls._determineDateType(dateObj)
         if dateTypeFlag == None:
-            raise InvalidDateType("Invalid Date Type")
+            raise InvalidDateType(f"Invalid Date Type {dateObj}")
         else:
-            parsingFunction = DateRepresentation._getParsingFunctionToDatetimeType(dateTypeFlag)
-            return parsingFunction(dateObj)  
+            parsingFunction = cls._getParsingFunctionToDatetimeType(dateTypeFlag)
+            return parsingFunction(dateObj)          
+        
     #######################################     
     ### Start of Helper function for type conversion
-    @staticmethod
-    def _determineDateType(dateToBeDetermined)->str:
-        if isinstance(dateToBeDetermined,str) and DateRepresentation.checkIfDateStandardFormat(dateToBeDetermined):
-            return DateRepresentation._dateTypeFlag[0]
+    @classmethod
+    def _determineDateType(cls,dateToBeDetermined)->str:
+        if isinstance(dateToBeDetermined,DateRepresentation):
+            return cls._dateTypeFlag[2]
+        elif isinstance(dateToBeDetermined,str) and DateRepresentation.checkIfDateStandardFormat(dateToBeDetermined):
+            return cls._dateTypeFlag[0]
         elif isinstance(dateToBeDetermined,datetime.date):
-            return DateRepresentation._dateTypeFlag[1]
+            return cls._dateTypeFlag[1]
         else: 
-            return 'notInRange'                                        
-    @staticmethod
-    def _getParsingFunctionToDatetimeType(typeFlag)->Callable[[Any],datetime.date]: 
+            return None                                        
+        
+    @classmethod
+    def _getParsingFunctionToDatetimeType(cls,typeFlag)->Callable[[Any],datetime.date]: 
         '''return the appropriate function'''
-        if typeFlag == DateRepresentation._dateTypeFlag[0]:
-            return DateRepresentation._standardFormatToDateTime
-        elif typeFlag == DateRepresentation._dateTypeFlag[1]:
-            return DateRepresentation._dateTimeToDateTime
+        if typeFlag == cls._dateTypeFlag[0]:
+            return cls._standardFormatToDateTime
+        elif typeFlag == cls._dateTypeFlag[1]:
+            return cls._dateTimeToDateTime
+        elif typeFlag == cls._dateTypeFlag[2]:
+            return cls._dateRepresentationToDateTime
         else : 
             return None    
-    @staticmethod
-    def _getParsingFunctionToStandardFormat(typeFlag)->Callable[[Any],str]: 
+    @classmethod
+    def _getParsingFunctionToStandardFormat(cls,typeFlag)->Callable[[Any],str]: 
         '''return the appropriate function'''
-        if typeFlag == DateRepresentation._dateTypeFlag[0]:
-            return DateRepresentation._standardFormatToStandardFormat
-        elif typeFlag == DateRepresentation._dateTypeFlag[1]:
-            return DateRepresentation._dateTimeToStandardFormat
+        if typeFlag == cls._dateTypeFlag[0]:
+            return cls._standardFormatToStandardFormat
+        elif typeFlag == cls._dateTypeFlag[1]:
+            return cls._dateTimeToStandardFormat
+        elif typeFlag == cls._dateTypeFlag[2]:
+            return cls._dateRepresentationToStandardFormat
         else : 
             return None  
               
     @staticmethod 
     def _standardFormatToDateTime(dateString:str)->datetime.date: 
-
+        def removeLeadingZero(dateString:str)->str:
+            if dateString[0] == '0':
+                return dateString[1:]
+            else: 
+                return dateString
         def extractYearFromStandardFormat(dateString:str)->int:
             dateInList=dateString.split('-')
-            return int(dateInList[0])                    
+            
+            
+            return int(removeLeadingZero(dateInList[0]))                    
         def extractMonthFromStandardFormat(dateString:str)->int:
             dateInList=dateString.split('-')
-            return int(dateInList[1])                    
+            return int(removeLeadingZero(dateInList[1]))                    
         def extractDayFromStandardFormat(dateString:str)->int:
             dateInList=dateString.split('-')
-            return int(dateInList[2])     
+            return int(removeLeadingZero(dateInList[2]))     
                 
         year = extractYearFromStandardFormat(dateString)
         month = extractMonthFromStandardFormat(dateString)
         day = extractDayFromStandardFormat(dateString)        
         
         return datetime.date(year,month,day)    
+    
+    @classmethod
+    def _dateRepresentationToDateTime(cls,dateObj:'DateRepresentation')->datetime.date:
+        return dateObj.dateTimeDate
+    
+    @classmethod
+    def _dateRepresentationToStandardFormat(cls,dateObj:'DateRepresentation')->str:
+        return dateObj.standardFormat
     @staticmethod
     def _dateTimeToDateTime(datetimeObj:datetime.date)->datetime.date:
         return datetimeObj
     @staticmethod 
     def _dateTimeToStandardFormat(dateInClass:datetime.date)->str: 
-        yearString = dateInClass.year
-        monthString = dateInClass.month
-        dayString = dateInClass.day
+        yearString = str(dateInClass.year)
+        monthString = str(dateInClass.month)
+        dayString = str(dateInClass.day)
+        if len(monthString) == 1:
+            monthString = '0'+monthString
+        if len(dayString) == 1:
+            dayString = '0'+dayString
         dateInStandardFormat = yearString+'-'+monthString+'-'+dayString
         return dateInStandardFormat    
     @staticmethod
@@ -173,35 +276,11 @@ class DateRepresentation(ABC):
     ### End of Helper function for type conversion        
     #######################################
 
-
-
-
-    @staticmethod
-    def getListOfDateStrWithinTwoDates(startedDateIncluded,endDateInclueded): 
-        startD = DateRepresentation(startedDateIncluded)
-        endD = DateRepresentation(endDateInclueded)
-        dateList=[]
-        while startD <= endD:
-            dateList.append(startD.standardFormat)
-            startD.changeToNextDay()
-        return dateList        
-        
-    @staticmethod
-    def checkIfDateStandardFormat(dateString)->bool:
-        '''It checks if the string dateString is of 'yyyy-mm-dd' format    '''
-        datePatten = r'\d{4}-\d{2}-\d{2}'
-        return re.match(datePatten,dateString)      
-
-    @staticmethod    
-    def _raiseComparisonError():
-        raise NotImplementedError("Comparison operators are not supported for NullDateRepresentation")        
-               
-    
-    
-    
-    
     
 class InvalidDateType(Exception):
-    pass 
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+    def __str__(self):
+        return f'{self.message}'
         
-    
