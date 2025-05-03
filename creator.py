@@ -7,7 +7,7 @@ from abc import ABC,abstractmethod
 import csv
 from date_utils import DateRepresentation
 from point import NoneDataPoint,PricingDataPoint,NewsNewsDataPoint
-from financial_analysis.dataCollection import CollectionGroup
+from financial_analysis.collectionGroup import CollectionGroup
 from shareEntity import ShareEntity
 
 class Creator(ABC): 
@@ -57,7 +57,7 @@ class PricingCollectionCreator(Creator):
                     collections.append(newDataPoint)
                                    
         shareEntity = ShareEntity.createShareCode(shareCode)
-        return CollectionGroup(collections,shareEntity)
+        return CollectionGroup(shareEntity,PricingDataPoint.getGroupElement(collections))
 
     @classmethod
     def _getKeyList(cls,dateIndex,openIndex,highIndex,lowIndex,closeIndex,AdjCloseIndex,volumnIndex)->list[str]:
@@ -107,7 +107,7 @@ class NewsCollectionCreator(Creator):
                     collections.append(newDataPoint)
                 
         shareEntity = ShareEntity.createShareCode(shareCode)     
-        return CollectionGroup(collections,shareEntity)
+        return CollectionGroup(shareEntity,NewsNewsDataPoint.getGroupElement(collections))
     
     @classmethod
     def _getKeyList(cls,dateIndex:int,siteAddressIndex:int,sentimentalScoreIndex:int)->list: 

@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from date_utils import DateRepresentation
 from point.dataPoint import DataPoint,GroupElement
+
 
 class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
@@ -10,11 +13,21 @@ class CarNDataPoint(DataPoint):
         self.__cumulativeAbnormalReturn = cumulativeAbnormalReturn
         self.__intervalN = intervalN
 
-    
+    def __hash__(self): 
+        hashStr = ("13" 
+                    +self.previousDate.standardFormatWithoutDash
+                    +self.followingDate.standardFormatWithoutDash
+                    +self.intervalN)
+        return int(hashStr)
+        
     @property
     def date(self)->DateRepresentation:
         return self.__date
-            
+
+    @property
+    def correspondingGroupElement(self)->GroupElement:
+        return CarNElement        
+                
     @property
     def previousDate(self)->DateRepresentation:
         return self.__previousDate    
@@ -33,7 +46,9 @@ class CarNDataPoint(DataPoint):
         
     @property
     def coordinate(self)->str:
-        return self.getCoordinateFrom(self.__previousDate,self.__date,self.__followingDate)
+        return ('p'+self.previousDate.standardFormat
+                +'f'+self.followingDate.standardFormat 
+                +'i'+str(self.intervalN))
          
         
     def valid(self)->bool:  
@@ -51,36 +66,15 @@ class CarNDataPoint(DataPoint):
             return False
     
     
-    
-    @classmethod
-    def getCoordinateFrom(
-        cls,
-        previousDate:DateRepresentation,
-        followingDate:DateRepresentation,
-        intervlN:int):
-        return ('p'+previousDate.standardFormat
-                +'f'+followingDate.standardFormat 
-                +'i'+str(intervlN))
-        
-    
-    @classmethod
-    def equivalent(cls, *arg)->bool:
-        coordinates = set()
-        
-        for iCar in list(arg): 
-            iCar: CarNDataPoint
-            coordinates.add(cls.getCoordinateFrom(
-                iCar.previousDate,
-                iCar.followingDate,
-                iCar.intervalN))
-            
-        return len(coordinates)==1
-
 
 
     @classmethod
     def getGroupElement(cls, points:list['CarNDataPoint']):
         return CarNElement(points)
+
+    @classmethod
+    def getTypeGroupElement(cls)->type[GroupElement]:
+        return CarNElement 
 
             
 class CarNElement(GroupElement):
@@ -92,18 +86,28 @@ class CarNElement(GroupElement):
         return CarNDataPoint
     
     @property
-    def element(self)->list[CarNDataPoint]:
+    def element(self)->dict[int,CarNDataPoint]:
         return self.__element
     
     @element.setter
     def element(self,val:list[CarNDataPoint]): 
-        validPoints = []
+        validPoints = dict()
         for iPoint in val: 
-            if iPoint.valid() and isinstance(iPoint,CarNDataPoint):
-                validPoints.append(iPoint)
+            if isinstance(iPoint,CarNDataPoint):
+                if iPoint.valid():
+                    validPoints[iPoint.__hash__()]=(validPoints)
         self.__element = validPoints
             
             
     
+    def convertible(self,targetClass:type[DataPoint])->bool:
+        return False 
+    
+    
+    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+        pass     
+    
+
+            
     
     

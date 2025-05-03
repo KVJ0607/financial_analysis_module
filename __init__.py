@@ -12,10 +12,9 @@ This module provide a base for future development according to the needs of fian
 
 
 
-from .shareEntity import ShareEntity
-from .financial_analysis.dataCollection import CollectionGroup
+from .financial_analysis.collectionGroup import CollectionGroup,GroupElement
 from .creator import PricingCollectionCreator,NewsCollectionCreator,Creator
 
 
-__all__ = [ShareEntity,CollectionGroup,Creator,PricingCollectionCreator,NewsCollectionCreator]
+__all__ = [CollectionGroup,GroupElement,Creator,PricingCollectionCreator,NewsCollectionCreator]
 

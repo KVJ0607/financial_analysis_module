@@ -41,8 +41,16 @@ class DateRepresentation:
     
 
     @property
-    def standardFormat(self)->str:        
-        return self._dateTimeToStandardFormat(self.__dateTimeDate)
+    def standardFormat(self)->str:
+        if DateRepresentation.isValid(self):        
+            return self._dateTimeToStandardFormat(self.__dateTimeDate)
+        else: 
+            return "9999-13-33"
+    
+    @property
+    def standardFormatWithoutDash(self)->str: 
+        aS,bS,cS = self.standardFormat.split('-')
+        return aS+bS+cS
     
     @property
     def year(self)->int:
@@ -54,6 +62,7 @@ class DateRepresentation:
     def day(self)->int:
         return self.dateTimeDate.day
 
+    
         
     def __add__(self, o:int):
         if self.isNullDay: 
@@ -74,28 +83,28 @@ class DateRepresentation:
     
     def __lt__(self,other:'DateRepresentation'):
         if self.isNullDay or other.isNullDay: 
-            raise
+            raise ValueError(f"""NullDay can't be compared""")
         return self.dateTimeDate < other.dateTimeDate    
         
     def __le__(self,other:'DateRepresentation'):
         if self.isNullDay or other.isNullDay: 
-            raise     
+            raise ValueError(f"""NullDay can't be compared""")
         else: 
             return self.dateTimeDate <= other.dateTimeDate                       
         
     def __gt__(self,other:'DateRepresentation'):        
         if self.isNullDay or other.isNullDay: 
-            raise
+            raise ValueError(f"""NullDay can't be compared""")
         return self.dateTimeDate > other.dateTimeDate    
         
     def __ge__(self,other:'DateRepresentation'):
         if self.isNullDay or other.isNullDay: 
-            raise
+            raise ValueError(f"""NullDay can't be compared""")
         return self.dateTimeDate >= other.dateTimeDate    
         
     def __eq__(self,other:'DateRepresentation'):         
         if self.isNullDay or other.isNullDay: 
-            raise
+            raise ValueError(f"""NullDay can't be compared""")
         return self.dateTimeDate == other.dateTimeDate
         
 
@@ -151,8 +160,9 @@ class DateRepresentation:
         
     @classmethod
     def isValid(cls,dateObj): 
-        if isinstance(dateObj,cls):
-            return True
+        if isinstance(dateObj,DateRepresentation):
+            if not dateObj.isNullDay:
+                return True
         elif isinstance(dateObj,str) and cls.checkIfDateStandardFormat(dateObj):
             return True
         elif isinstance(dateObj,datetime.date):
@@ -268,11 +278,30 @@ class DateRepresentation:
             monthString = '0'+monthString
         if len(dayString) == 1:
             dayString = '0'+dayString
+        if len(yearString) ==3: 
+            yearString = '0'+yearString
+        elif len(yearString)==2:
+            yearString = '00'+yearString
+        elif len(yearString)==1:
+            yearString = '000'+yearString            
         dateInStandardFormat = yearString+'-'+monthString+'-'+dayString
         return dateInStandardFormat    
     @staticmethod
     def _standardFormatToStandardFormat(datetimeStr:str)->str:
-        return datetimeStr
+        yearString,monthString,dayString = datetimeStr.split('-')
+        if len(monthString) == 1:
+            monthString = '0'+monthString
+        if len(dayString) == 1:
+            dayString = '0'+dayString
+        if len(yearString) ==3: 
+            yearString = '0'+yearString
+        elif len(yearString)==2:
+            yearString = '00'+yearString
+        elif len(yearString)==1:
+            yearString = '000'+yearString            
+        dateInStandardFormat = yearString+'-'+monthString+'-'+dayString
+        return dateInStandardFormat    
+    
     ### End of Helper function for type conversion        
     #######################################
 
