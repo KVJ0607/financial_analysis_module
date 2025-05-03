@@ -29,14 +29,14 @@ company.
 
 
 from .dataPoint import DataPoint,GroupElement
-from .point_imp.carNDataPoint import CarNDataPoint,CarNElement
-from .point_imp.pricingDataPoint import PricingDataPoint,PricingElement
-from .point_imp.newsnewsDataPoint import NewsNewsDataPoint,NewsNewsElement
-from .point_imp.NoneDataPoint import NoneDataPoint,NoneElement
+from .data_points.carNDataPoint import CarNDataPoint,CarNElement
+from .data_points.pricingDataPoint import PricingDataPoint,PricingElement
+from .data_points.newsnewsDataPoint import NewsNewsDataPoint,NewsNewsElement
+from .data_points.NoneDataPoint import NoneDataPoint,NoneElement
 
 
-__all__ = [DataPoint,GroupElement,
-           CarNDataPoint,CarNElement,
-           NoneDataPoint,NoneElement,
-           PricingDataPoint,PricingElement,
-           NewsNewsDataPoint,NewsNewsElement]
+__all__ = ["DataPoint","GroupElement",
+           "CarNDataPoint","CarNElement",
+           "NoneDataPoint","NoneElement",
+           "PricingDataPoint","PricingElement",
+           "NewsNewsDataPoint","NewsNewsElement"]
