@@ -26,7 +26,13 @@ class DateRepresentation:
         except InvalidDateType as e:
             self.__dateTimeDate = datetime.date(1,1,1)
             self.__nullDay = True
-                
+    
+    def __str__(self): 
+        if self.__nullDay: 
+            return 'None'
+        else: 
+            return self.standardFormat
+                    
     @property
     def dateTimeDate(self)->datetime.date:
         return self.__dateTimeDate  
@@ -47,10 +53,6 @@ class DateRepresentation:
         else: 
             return "9999-13-33"
     
-    @property
-    def standardFormatWithoutDash(self)->str: 
-        aS,bS,cS = self.standardFormat.split('-')
-        return aS+bS+cS
     
     @property
     def year(self)->int:

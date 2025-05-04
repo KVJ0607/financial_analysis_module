@@ -1,9 +1,11 @@
 from __future__ import annotations
 from abc import ABC,abstractmethod
+
+
 from typing import Callable
 
 from date_utils.dateRepresentation import DateRepresentation
-
+from collection_vistor import Vistor
 
 class DataPoint(ABC):        
 
@@ -31,6 +33,7 @@ class DataPoint(ABC):
     @abstractmethod
     def valid(self)->bool:  
         pass 
+
     
 
     @classmethod
@@ -43,7 +46,12 @@ class DataPoint(ABC):
     def getTypeGroupElement(cls)->type[GroupElement]:
         pass 
 
+
+
+
+
 class GroupElement(ABC): 
+    
     @property
     @abstractmethod
     def eleClass(self)->type[DataPoint]: 
@@ -52,6 +60,7 @@ class GroupElement(ABC):
     @property
     def eleClassInStr(self)->str: 
         return self.eleClass.__name__
+    
                                
     @property         
     @abstractmethod
@@ -59,9 +68,21 @@ class GroupElement(ABC):
         """set containing valid DataPoint. Return an empty
         set if there is no valid DataPoint"""
         pass 
-    
 
-    
+
+    @abstractmethod
+    def acceptVistor(
+        self,
+        v:Vistor):
+        pass
+
+    @abstractmethod
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        pass 
+
     @classmethod
     @abstractmethod
     def convertible(
@@ -84,7 +105,6 @@ class GroupElement(ABC):
     def getConvertResultClasses(cls)->list[DataPoint]:
         pass 
         
-            
-        
+
     
     

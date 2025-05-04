@@ -17,9 +17,10 @@ import group_operators
 import group_creator 
 import point 
 from collectionGroup import CollectionGroup
+import collection_vistor
 
 import date_utils
 from shareEntity import ShareEntity
 
-__all__ = ["group_operators","group_creator","point","CollectionGroup","date_utils","ShareEntity"]
+__all__ = ["group_operators","group_creator","point","CollectionGroup","date_utils","ShareEntity","collection_vistor"]
 

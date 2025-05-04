@@ -2,7 +2,7 @@ from date_utils import DateRepresentation
 from ..dataPoint import DataPoint,GroupElement
 from .carNDataPoint import CarNDataPoint,CarNElement
 from .NoneDataPoint import NoneDataPoint
-
+from collection_vistor import Vistor
     
 class PricingDataPoint(DataPoint): 
     def __init__(self,date,open,high,low,close,adjClose,volume):               
@@ -18,7 +18,7 @@ class PricingDataPoint(DataPoint):
     
 
     def __hash__(self): 
-        hashStr = ("12"+self.date.standardFormatWithoutDash)
+        hashStr = ("12"+str(self.date).replace('-',''))
         return int(hashStr)
 
         
@@ -42,9 +42,6 @@ class PricingDataPoint(DataPoint):
         except: 
             return None
     
-    @property
-    def coordinate(self)->str:
-         return self.date.standardFormat
     
     def valid(self)->bool:   
         if not DateRepresentation.isValid(self.date): 
@@ -85,6 +82,7 @@ class PricingElement(GroupElement):
                 if iPoint.valid():
                     validPoints[iPoint.__hash__()]=(iPoint)
         self.__element = validPoints                     
+
     
     @property
     def dates(self)->list[DateRepresentation]:
@@ -93,6 +91,16 @@ class PricingElement(GroupElement):
             thisDates.append(iEle.date)
         return thisDates
 
+
+    def acceptVistor(self,v:Vistor):
+        return v.visitPricingElement(self)    
+
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        return v.visitOutPricingElement(self,dest)
+    
     
     @classmethod
     def convertible(cls,targetClass:type[DataPoint])->bool:
@@ -133,7 +141,7 @@ class PricingElement(GroupElement):
 
     
     def getPointFrom(self,date:DateRepresentation)->PricingDataPoint:
-        hashStr = ("12"+date.standardFormatWithoutDash)        
+        hashStr = ("12"+str(date).replace('-',''))        
         return self.element.get(int(hashStr),NoneDataPoint)    
     
 

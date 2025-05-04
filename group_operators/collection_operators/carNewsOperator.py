@@ -1,12 +1,14 @@
    
 from __future__ import annotations
 
+# import matplotlib.pyplot as plt
+# import numpy as np
 
 
 from ..collectionOperator import CollectionOperator
-from point import DataPoint,GroupElement,NoneDataPoint,CarNDataPoint,CarNElement,NewsNewsDataPoint,NewsNewsElement,PricingDataPoint
+from point import DataPoint,GroupElement,NoneDataPoint,CarNDataPoint,CarNElement,NewsNewsDataPoint,NewsElement,PricingDataPoint
 from date_utils import DateRepresentation
-
+from collection_vistor import Vistor
 
 class CarNewsOperator(CollectionOperator): 
     """
@@ -61,7 +63,7 @@ class CarNewsOperator(CollectionOperator):
         gEleA:GroupElement,
         gEleB:GroupElement) -> GroupElement:                        
         carEle:CarNElement = None 
-        newsEle:NewsNewsElement = None
+        newsEle:NewsElement = None
                 
         if (gEleA.eleClass == CarNDataPoint
             and gEleB.eleClass == NewsNewsDataPoint): 
@@ -75,7 +77,7 @@ class CarNewsOperator(CollectionOperator):
             raise TypeError(f"""{gEleA} and {gEleB}
                             are of type {type[gEleA]}
                             and {type[gEleB]}, but not 
-                            {CarNElement} and {NewsNewsElement}""")
+                            {CarNElement} and {NewsElement}""")
         
         
         carNewsDataPoints = []
@@ -174,10 +176,22 @@ class CarsNewsElement(GroupElement):
         validPoints = dict()
         for iPoint in val: 
             if iPoint.valid() and isinstance(iPoint,CarsNewsDataPoint):
-                validPoints[iPoint.carN.coordinate] = iPoint
+                validPoints[iPoint.carN.__hash__()] = iPoint
         self.__element = validPoints            
+
+
+    def acceptVistor(self,v:Vistor):
+        return v.visitCarsNewsElement(self)  
+
+   
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        return v.visitOutCarsNewsElement(self,dest)        
         
-    
+
+    @classmethod
     def convertible(cls,targetClass:type[DataPoint])->bool:
         return False 
     

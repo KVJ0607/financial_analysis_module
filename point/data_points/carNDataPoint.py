@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from date_utils import DateRepresentation
 from point.dataPoint import DataPoint,GroupElement
-
+from collection_vistor import Vistor
 
 class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
@@ -15,8 +15,8 @@ class CarNDataPoint(DataPoint):
 
     def __hash__(self): 
         hashStr = ("13" 
-                    +self.previousDate.standardFormatWithoutDash
-                    +self.followingDate.standardFormatWithoutDash
+                    +str(self.previousDate).replace('-','')
+                    +str(self.followingDate).replace('-','')
                     +self.intervalN)
         return int(hashStr)
         
@@ -42,13 +42,7 @@ class CarNDataPoint(DataPoint):
 
     @property
     def intervalN(self)->int: 
-        return self.__intervalN
-        
-    @property
-    def coordinate(self)->str:
-        return ('p'+self.previousDate.standardFormat
-                +'f'+self.followingDate.standardFormat 
-                +'i'+str(self.intervalN))
+        return self.__intervalN        
          
         
     def valid(self)->bool:  
@@ -97,7 +91,17 @@ class CarNElement(GroupElement):
                 if iPoint.valid():
                     validPoints[iPoint.__hash__()]=(validPoints)
         self.__element = validPoints
-            
+
+
+    
+    def acceptVistor(self,v:Vistor):
+        return v.visitCarNElement(self)            
+
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        return v.visitOutCarNElement(self,dest)
             
     @classmethod
     def convertible(cls,targetClass:type[DataPoint])->bool:

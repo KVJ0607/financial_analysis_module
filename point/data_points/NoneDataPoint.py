@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from date_utils import DateRepresentation
 from point.dataPoint import DataPoint,GroupElement
+from collection_vistor import Vistor
 
         
 class NoneDataPoint(DataPoint): 
@@ -16,7 +17,7 @@ class NoneDataPoint(DataPoint):
             self.__date = DateRepresentation(date)
         
     def __hash__(self): 
-        hashStr = "10"+self.date.standardFormatWithoutDash
+        hashStr = "10"+str(self.date).replace('-','')
         return int(hashStr)
 
     @property
@@ -27,10 +28,6 @@ class NoneDataPoint(DataPoint):
     def correspondingGroupElement(self)->GroupElement:
         return NoneElement        
 
-    @property
-    def coordinate(self):
-        '''Special Index saved for NoneDataPoint'''
-        return 'NoneDataPoint'+self.date.dateTimeDate
     
     def valid():  
         return False                               
@@ -43,6 +40,8 @@ class NoneDataPoint(DataPoint):
     def getTypeGroupElement(cls)->type[GroupElement]:
         return NoneElement
 
+
+
 class NoneElement(GroupElement):    
     def __init__(self):
         self.__done = True         
@@ -54,7 +53,17 @@ class NoneElement(GroupElement):
     @property
     def element(self)->dict[int,NoneDataPoint]:
         return dict()
-    
+
+
+    def acceptVistor(self,v:Vistor):
+        return v.visitNoneElement(self)
+
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        return v.visitOutNoneElement(self,dest)        
+        
     @classmethod
     def convertible(cls,targetClass:type[DataPoint])->bool:
         return False 

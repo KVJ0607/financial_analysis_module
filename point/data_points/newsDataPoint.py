@@ -1,6 +1,7 @@
 from date_utils import DateRepresentation
 from ..dataPoint import DataPoint,GroupElement
 from .NoneDataPoint import NoneDataPoint        
+from collection_vistor import Vistor
 
 class NewsNewsDataPoint(DataPoint): 
     
@@ -12,7 +13,7 @@ class NewsNewsDataPoint(DataPoint):
 
     def __hash__(self): 
         hashStr = ("14" 
-                    +self.date.standardFormatWithoutDash)
+                    +str(self.date).replace('-',''))
         return int(hashStr)
             
     @property
@@ -25,7 +26,7 @@ class NewsNewsDataPoint(DataPoint):
 
     @property
     def correspondingGroupElement(self)->GroupElement:
-        return NewsNewsElement        
+        return NewsElement        
             
     @property
     def sentimentalScore(self)->float: 
@@ -39,9 +40,6 @@ class NewsNewsDataPoint(DataPoint):
         except:
             self.__sentimentalScore = None
 
-    @property
-    def coordinate(self)->str: 
-        return self.date.standardFormat
     
     def valid(self):
         return (DateRepresentation.isValid(self.date) 
@@ -49,14 +47,14 @@ class NewsNewsDataPoint(DataPoint):
     
     @classmethod
     def getGroupElement(cls, points:list['NewsNewsDataPoint']):
-        return NewsNewsElement(points)
+        return NewsElement(points)
 
     def getTypeGroupElement(cls)->type[GroupElement]:
-        return NewsNewsElement
+        return NewsElement
     
     
 
-class NewsNewsElement(GroupElement):
+class NewsElement(GroupElement):
     def __init__(self,points:list[NewsNewsDataPoint]):
         self.element = points        
     
@@ -76,6 +74,18 @@ class NewsNewsElement(GroupElement):
                 if iPoint.valid():
                     validPoints[iPoint.__hash__()]=(iPoint)
         self.__element = validPoints
+
+
+    
+    def acceptVistor(self,v:Vistor):
+        return v.visitNewsElement(self)
+    
+    def acceptOutVistor(
+        self,
+        v:Vistor,
+        dest:str): 
+        return v.visitOutNewsElement(self,dest)
+
                 
     @classmethod
     def convertible(cls,targetClass:type[DataPoint])->bool:
@@ -87,7 +97,7 @@ class NewsNewsElement(GroupElement):
     
     def getPointFrom(self,date:DateRepresentation)->NewsNewsDataPoint: 
         hashStr = ("14" 
-                    +date.standardFormatWithoutDash)
+                    +str(date).replace('-',''))
         return self.element.get(int(hashStr),NoneDataPoint)
     
     
