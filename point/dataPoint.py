@@ -30,7 +30,6 @@ class DataPoint(ABC):
                 
     @abstractmethod
     def valid(self)->bool:  
-        '''Return true if it is a valid data. The implementation logic based on the actual subclass'''
         pass 
     
 
@@ -53,7 +52,7 @@ class GroupElement(ABC):
     @property
     def eleClassInStr(self)->str: 
         return self.eleClass.__name__
-                           
+                               
     @property         
     @abstractmethod
     def element(self)->dict[int,DataPoint]: 
@@ -61,32 +60,31 @@ class GroupElement(ABC):
         set if there is no valid DataPoint"""
         pass 
     
+
+    
+    @classmethod
     @abstractmethod
-    def convertible(self,targetClass:type[DataPoint])->bool:
+    def convertible(
+        cls,
+        targetClass:type[DataPoint]
+        )->bool:
         pass 
+    
+    
+                    
     
     @abstractmethod
     def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
         pass 
-    
+
+
     
     @classmethod
-    def pointwise(cls,eleA:GroupElement,eleB:GroupElement,opperation):
-        if eleA.eleClass != eleB.eleClass: 
-            raise TypeError(f"""{eleA} and {eleB} are of type {type(eleA)}
-                            and {type(eleB)}. They should be of 
-                            the same type""")
+    @abstractmethod
+    def getConvertResultClasses(cls)->list[DataPoint]:
+        pass 
         
-        if not callable(opperation): 
-            raise AttributeError(f"{opperation} is not callable")
+            
         
-        for iHashA,iPointA in eleA.element.items():
-            if iPointA in eleB.element:
-                newPoint = opperation(
-                    iPointA,
-                    eleB.element[iHashA]
-                )
-                
-                eleA.element[iHashA] = newPoint
-                eleB.element[iHashA] = newPoint
-
+    
+    

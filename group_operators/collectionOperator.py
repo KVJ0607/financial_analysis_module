@@ -60,3 +60,4 @@ class CollectionOperator(ABC) :
             if targetClass == subclass.pointClassToBeReturned:
                 return subclass
         return None 
+    

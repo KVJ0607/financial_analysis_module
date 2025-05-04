@@ -93,7 +93,9 @@ class PricingElement(GroupElement):
             thisDates.append(iEle.date)
         return thisDates
 
-    def convertible(self,targetClass:type[DataPoint])->bool:
+    
+    @classmethod
+    def convertible(cls,targetClass:type[DataPoint])->bool:
         if targetClass == CarNDataPoint:
             return True
         else: 
@@ -134,4 +136,7 @@ class PricingElement(GroupElement):
         hashStr = ("12"+date.standardFormatWithoutDash)        
         return self.element.get(int(hashStr),NoneDataPoint)    
     
-    
+
+    @classmethod
+    def getConvertResultClasses(cls)->list[DataPoint]:
+        return [CarNDataPoint]    

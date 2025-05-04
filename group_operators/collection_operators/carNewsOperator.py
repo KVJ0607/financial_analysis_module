@@ -4,7 +4,7 @@ from __future__ import annotations
 
 
 from ..collectionOperator import CollectionOperator
-from point import DataPoint,GroupElement,NoneDataPoint,NoneElement,CarNDataPoint,CarNElement,NewsNewsDataPoint,NewsNewsElement,PricingDataPoint,PricingElement
+from point import DataPoint,GroupElement,NoneDataPoint,CarNDataPoint,CarNElement,NewsNewsDataPoint,NewsNewsElement,PricingDataPoint
 from date_utils import DateRepresentation
 
 
@@ -16,7 +16,7 @@ class CarNewsOperator(CollectionOperator):
 
     @property
     def pointClassToBeReturned(self):
-        return self.CarsNewsDataPoint         
+        return CarsNewsDataPoint         
 
     @classmethod
     def match(
@@ -84,11 +84,13 @@ class CarNewsOperator(CollectionOperator):
                 previousDate = carPoint.previousDate
                 followingDate = carPoint.followingDate                 
                 accumlatedSentimentalScore = 0                    
-                for iTime in DateRepresentation.getDateRange(previousDate,followingDate): 
+                for iTime in DateRepresentation.getDateRange(
+                    previousDate,
+                    followingDate): 
                     iDataPoint = newsEle.getPointFrom(iTime)
                     accumlatedSentimentalScore += iDataPoint.sentimentalScore
                 carNewsDataPoints.append(
-                    CarNewsOperator.CarsNewsDataPoint(
+                    CarsNewsDataPoint(
                         carPoint,
                         accumlatedSentimentalScore)
                 )                        
@@ -96,7 +98,7 @@ class CarNewsOperator(CollectionOperator):
             print(F"Error: {gEleA.eleClass} and {gEleB.eleClass}")
             raise e
                 
-        return CarNewsOperator.CarsNewsDataPoint.getGroupElement(carNewsDataPoints)
+        return CarsNewsDataPoint.getGroupElement(carNewsDataPoints)
         
     
     @classmethod
@@ -115,68 +117,76 @@ class CarNewsOperator(CollectionOperator):
             
 
     
-    class CarsNewsDataPoint(DataPoint):
-        def __init__(self,carN,accumlatedSentimentalScore:float):
-            if isinstance(carN,CarNDataPoint):
-                self.carN = carN
-            else:
-                self.carN = NoneDataPoint
-            try:                
-                self.accumlatedSentimentalScore = float(accumlatedSentimentalScore)
-            except: 
-                self.accumlatedSentimentalScore = None
-            
-        def __hash__(self): 
-            return CarNDataPoint.__hash__()*1000+NewsNewsDataPoint.__hash__()
+class CarsNewsDataPoint(DataPoint):
+    def __init__(self,carN,accumlatedSentimentalScore:float):
+        if isinstance(carN,CarNDataPoint):
+            self.carN = carN
+        else:
+            self.carN = NoneDataPoint
+        try:                
+            self.accumlatedSentimentalScore = float(accumlatedSentimentalScore)
+        except: 
+            self.accumlatedSentimentalScore = None
         
-        @property
-        def date(self)->DateRepresentation:
-            return self.carN.date
+    def __hash__(self): 
+        return CarNDataPoint.__hash__()*1000+NewsNewsDataPoint.__hash__()
+    
+    @property
+    def date(self)->DateRepresentation:
+        return self.carN.date
+    
+    def valid(self)->bool:  
+        return (self.date.isValid() 
+                and isinstance(self.accumlatedSentimentalScore,float))
         
-        def valid(self)->bool:  
-            return (self.date.isValid() 
-                    and isinstance(self.accumlatedSentimentalScore,float))
-            
-        @classmethod            
-        def equivalent(cls,*arg)->bool: 
-            coordinates = set()
-            for iPoint in arg:
-                if not isinstance(iPoint,'CarNewsOperators.CarsNewsDataPoint'): 
-                    return False
-                coordinates.add(iPoint.carN.coordinate)
-            return len(coordinates) == 1
+    @classmethod            
+    def equivalent(cls,*arg)->bool: 
+        coordinates = set()
+        for iPoint in arg:
+            if not isinstance(iPoint,CarsNewsDataPoint): 
+                return False
+            coordinates.add(iPoint.carN.coordinate)
+        return len(coordinates) == 1
+    
+    @classmethod
+    def getGroupElement(
+        cls,
+        points:list['DataPoint'])->CarsNewsElement: 
+        return  CarsNewsElement(points)
+
+
+    
+class CarsNewsElement(GroupElement):
+    
+    def __init__(self,points:list[CarsNewsDataPoint]):
+        self.element = points 
         
-        @classmethod
-        def getGroupElement(cls,points:list['DataPoint'])->'CarNewsOperator.CarsNewsElement': 
-            return  CarNewsOperator.CarsNewsElement(points)
+    @property
+    def eleClass(self)->type[DataPoint]: 
+        return CarsNewsDataPoint
+    
+    @property
+    def element(self)->dict[str,CarsNewsDataPoint]:
+        return self.__element
+    
+    @element.setter
+    def element(self,val:list[CarsNewsDataPoint]): 
+        validPoints = dict()
+        for iPoint in val: 
+            if iPoint.valid() and isinstance(iPoint,CarsNewsDataPoint):
+                validPoints[iPoint.carN.coordinate] = iPoint
+        self.__element = validPoints            
         
-    class CarsNewsElement(GroupElement):
-        
-        def __init__(self,points:list[CarNewsOperator.CarsNewsDataPoint]):
-            self.element = points 
-            
-        @property
-        def eleClass(self)->type[DataPoint]: 
-            return CarNewsOperator.CarsNewsDataPoint
-        
-        @property
-        def element(self)->dict[str,CarNewsOperator.CarsNewsDataPoint]:
-            return self.__element
-        
-        @element.setter
-        def element(self,val:list[CarNewsOperator.CarsNewsDataPoint]): 
-            validPoints = dict()
-            for iPoint in val: 
-                if iPoint.valid() and isinstance(iPoint,CarNewsOperator.CarsNewsDataPoint):
-                    validPoints[iPoint.carN.coordinate] = iPoint
-            self.__element = validPoints            
-            
-        
-        def convertible(self,targetClass:type[DataPoint])->bool:
-            return False 
-        
-        def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
-            pass          
+    
+    def convertible(cls,targetClass:type[DataPoint])->bool:
+        return False 
+    
+    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+        pass     
+         
+    @classmethod
+    def getConvertResultClasses(cls)->list[DataPoint]:
+        return []    
             
 
         

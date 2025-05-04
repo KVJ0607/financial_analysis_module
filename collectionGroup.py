@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Type
+from typing import Type,Callable
 
 from shareEntity import ShareEntity
 import point
@@ -24,8 +24,7 @@ class CollectionGroup:
         self.__cayleyTable = cayleyTable
         
                 
-        self.updateCayleyTableWithGroupElements(*args)
-        self.updateCayleyTableWithGroupElements()                              
+        self.updateCayleyTableWithGroupElements(*args)                          
 
         
         self.shareEntity = shareCode
@@ -68,7 +67,14 @@ class CollectionGroup:
         for iArg in args: 
             if isinstance(iArg,point.GroupElement): 
                 unseenClass.append(iArg.eleClass)
-                self.__cayleyTable[iArg.eleClass] = iArg        
+                self.__cayleyTable[iArg.eleClass] = iArg   
+                resultClasses = iArg.getConvertResultClasses()
+                if resultClasses:
+                    for resultClass in resultClasses: 
+                        if self.nullElementClass(resultClass): 
+                            self.__cayleyTable[resultClass] = iArg.convertTo(resultClass)
+                            unseenClass.append(resultClass)
+                    
         
         allCombination = self.__getAllCrossSignature(unseenClass)
         seenCombination = list()
@@ -199,7 +205,8 @@ class CollectionGroup:
         self,
         groupA:CollectionGroup,
         groupB:CollectionGroup,
-        spaceOfClass:type[point.DataPoint])->point.GroupElement:
+        spaceOfClass:type[point.DataPoint],
+        pointwiseOperation:Callable)->point.GroupElement:
         
         if not groupA.containElementClass(spaceOfClass): 
             groupA.expandGroup(spaceOfClass)
@@ -213,9 +220,22 @@ class CollectionGroup:
         spaceElementB = groupB.getElement(spaceOfClass)
         if isinstance(spaceElementA,point.NoneElement): 
             raise ValueError(f"""{groupA} don't have point class 
-                             {spaceOfClass} data""")
+                            {spaceOfClass} data""")
         elif isinstance(spaceElementB,point.NoneElement): 
             raise ValueError(f"""{groupA} don't have point class {
                 spaceOfClass} data""")
+        
+        products= []            
+        for aHash in spaceElementA.element: 
+            if aHash in spaceElementB.element: 
+                products.append(pointwiseOperation(
+                    spaceElementA.element[aHash],
+                    spaceElementB.element[aHash]
+                ))
+        return spaceElementA.eleClass.getGroupElement(products)
+                    
+                
+                
+                
             
         

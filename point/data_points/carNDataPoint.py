@@ -99,15 +99,17 @@ class CarNElement(GroupElement):
         self.__element = validPoints
             
             
-    
-    def convertible(self,targetClass:type[DataPoint])->bool:
+    @classmethod
+    def convertible(cls,targetClass:type[DataPoint])->bool:
         return False 
     
     
     def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
         pass     
     
-
+    @classmethod
+    def getConvertResultClasses(cls)->list[DataPoint]:
+        return []
             
     
     

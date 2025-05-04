@@ -77,8 +77,8 @@ class NewsNewsElement(GroupElement):
                     validPoints[iPoint.__hash__()]=(iPoint)
         self.__element = validPoints
                 
-
-    def convertible(self,targetClass:type[DataPoint])->bool:
+    @classmethod
+    def convertible(cls,targetClass:type[DataPoint])->bool:
         return False 
     
     
@@ -91,4 +91,6 @@ class NewsNewsElement(GroupElement):
         return self.element.get(int(hashStr),NoneDataPoint)
     
     
-        
+    @classmethod
+    def getConvertResultClasses(cls)->list[DataPoint]:
+        return []        

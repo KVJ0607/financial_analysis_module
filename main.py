@@ -1,5 +1,9 @@
-from group_creator import PricingCollectionCreator,NewsCollectionCreator
+import copy
+import math
 
+from group_creator import PricingCollectionCreator,NewsCollectionCreator
+from collectionGroup import CollectionGroup
+import point
 
 firstTractorH = PricingCollectionCreator.getInstacnefrom("example_data/hshare/0038.HK.csv")
 firstTractorA = PricingCollectionCreator.getInstacnefrom("example_data/ashare/601038.SH.csv")
@@ -8,5 +12,25 @@ newsSentiment = NewsCollectionCreator.getInstacnefrom("example_data/sentiment/te
 
 firstTractorA.joinGroupTable(newsSentiment)
 firstTractorH.joinGroupTable(newsSentiment)
+
+for i in firstTractorA.valuedSubgroup: 
+    print("valued ",i)
+
+def carDiff(gPointA,gPointB): 
+    
+    newPoint = copy.copy(gPointA)
+    cardiff = gPointA.cumulativeAbnormalReturn-gPointB.cumulativeAbnormalReturn
+    if cardiff < 0 : 
+        cardiff = cardiff*-1
+    newPoint.cumulativeAbnormalReturn=cardiff
+    return newPoint
+    
+
+CollectionGroup.operateOfelementInClassSpace(
+    firstTractorA,
+    firstTractorH,
+    point.CarNDataPoint,
+    carDiff)
+
 
 
