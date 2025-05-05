@@ -5,10 +5,9 @@ from __future__ import annotations
 # import numpy as np
 
 
-from ..collectionOperator import CollectionOperator
+from ..operator import CollectionOperator
 from element_of_group import DataPoint,Element,NoneDataPoint,CarNDataPoint,CarNElement,NewsElement,PricingElement
 from date_utils import DateRepresentation
-from collection_vistor import Vistor
 
 class CarNewsOperator(CollectionOperator): 
 
@@ -22,7 +21,7 @@ class CarNewsOperator(CollectionOperator):
         classA:type[Element],
         classB:type[Element])->bool:
         eSignature = set([classA,classB])
-        for iSignature in cls.signature(): 
+        for iSignature in cls.signatures(): 
             if iSignature == eSignature: 
                 return True
         return False
@@ -35,7 +34,7 @@ class CarNewsOperator(CollectionOperator):
         gEleB:Element,
         )->Element: 
         eSignature = set([type(gEleA),type(gEleB)])    
-        for iSignature in cls.signature():
+        for iSignature in cls.signatures():
             if iSignature == eSignature: 
                 if eSignature == set([CarNElement,NewsElement]):
                     return cls.__defaultOperator(gEleA,gEleB)  
@@ -46,7 +45,7 @@ class CarNewsOperator(CollectionOperator):
         
     
     @classmethod
-    def signature(cls)->list[set]: 
+    def signatures(cls)->list[set]: 
         signatures = []
         signatures.append(set([CarNElement,NewsElement]))
         signatures.append(set([PricingElement,NewsElement]))
@@ -78,7 +77,7 @@ class CarNewsOperator(CollectionOperator):
         
         carNewsDataPoints = []
         try:
-            for carHash,carPoint in carEle.inList.items():                 
+            for carHash,carPoint in carEle.inDict.items():                 
                 previousDate = carPoint.previousDate
                 followingDate = carPoint.followingDate                 
                 accumlatedSentimentalScore = 0                    
@@ -148,18 +147,18 @@ class CarsNewsDataPoint(DataPoint):
 class CarsNewsElement(Element):
     
     def __init__(self,points:list[CarsNewsDataPoint]):
-        self.inList = points 
+        self.inDict = points 
         
     @property
     def pointType(self)->type[DataPoint]: 
         return CarsNewsDataPoint
     
     @property
-    def inList(self)->dict[str,CarsNewsDataPoint]:
+    def inDict(self)->dict[str,CarsNewsDataPoint]:
         return self.__element
     
-    @inList.setter
-    def inList(self,val:list[CarsNewsDataPoint]): 
+    @inDict.setter
+    def inDict(self,val:list[CarsNewsDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
             if iPoint.valid() and isinstance(iPoint,CarsNewsDataPoint):

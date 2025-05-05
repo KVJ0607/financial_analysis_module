@@ -43,21 +43,25 @@ class CollectionOperator(ABC) :
         leftOperand:Element,
         rightOperand:Element)->Element:
         """
-        The dot method is a classmethod that acts as a operator 
-        ofdataCollections  group. It will return a new
-        DataCollection with the result of the operation.
+        The dot method is a classmethod that acts as a
+        operator of Element. It will return a new
+        Element.
         """
         pass
     
     @classmethod
     @abstractmethod
-    def signature(cls)->list[set]: 
+    def signatures(cls)->list[set]: 
+        """Return a list of set which act as a signature.
+        Each signature is a set of two type[Element] which
+        can be the operant.
+        """        
         pass 
     
-    @classmethod
-    def getEleOperator(cls,targetClass:type[Element])->type[CollectionOperator] | None:    
+    @classmethod 
+    def getOperator(
+        cls,
+        targetClass:type[Element])->type[CollectionOperator]:
         for subclass in cls.__subclasses__():
             if targetClass == subclass.productClass:
                 return subclass
-        return None 
-    

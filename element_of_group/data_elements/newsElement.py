@@ -3,7 +3,6 @@ from __future__ import annotations
 from date_utils import DateRepresentation
 from ..element import DataPoint,Element
 from .NoneElement import NoneDataPoint        
-from collection_vistor import Vistor
 
 class NewsDataPoint(DataPoint): 
     
@@ -27,7 +26,7 @@ class NewsDataPoint(DataPoint):
         self.__date = DateRepresentation(val)
 
     @property
-    def correspondingGroupElement(self)->Element:
+    def correspondingGroupElement(self)->type[Element]:
         return NewsElement        
             
     @property
@@ -48,7 +47,7 @@ class NewsDataPoint(DataPoint):
                 and isinstance(self.sentimentalScore,float))
     
     @classmethod
-    def getGroupElement(cls, points:list[NewsDataPoint]):
+    def getGroupElement(cls, points:list[NewsDataPoint])->NewsElement:
         return NewsElement(points)
 
     def getTypeGroupElement(cls)->type[Element]:
@@ -58,18 +57,18 @@ class NewsDataPoint(DataPoint):
 
 class NewsElement(Element):
     def __init__(self,points:list[NewsDataPoint]):
-        self.inList = points        
+        self.inDict = points        
     
     @property
     def pointType(self)->type[DataPoint]: 
         return NewsDataPoint
     
     @property
-    def inList(self)->dict[int,NewsDataPoint]:
+    def inDict(self)->dict[int,NewsDataPoint]:
         return self.__element
     
-    @inList.setter
-    def inList(self,val:list[NewsDataPoint]): 
+    @inDict.setter
+    def inDict(self,val:list[NewsDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,NewsDataPoint):
@@ -79,12 +78,12 @@ class NewsElement(Element):
 
 
     
-    def acceptVistor(self,v:Vistor):
+    def acceptVistor(self,v):
         return v.visitNewsElement(self)
     
     def acceptOutVistor(
         self,
-        v:Vistor,
+        v,
         dest:str): 
         return v.visitOutNewsElement(self,dest)
 
@@ -100,7 +99,7 @@ class NewsElement(Element):
     def getPointFrom(self,date:DateRepresentation)->NewsDataPoint: 
         hashStr = ("14" 
                     +str(date).replace('-',''))
-        return self.inList.get(int(hashStr),NoneDataPoint)
+        return self.inDict.get(int(hashStr),NoneDataPoint)
     
     
     @classmethod

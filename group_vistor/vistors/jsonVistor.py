@@ -9,7 +9,7 @@ class JsonStrVistor(Vistor):
         self,
         cEle:element_of_group.CarNElement)->str:
         eleList = []
-        for iHash,iCar in cEle.inList.items(): 
+        for iHash,iCar in cEle.inDict.items(): 
             if iCar.valid():
                 eleList.append({
                 'date':str(iCar.date),
@@ -30,7 +30,7 @@ class JsonStrVistor(Vistor):
         nEle:element_of_group.NewsElement)->str:
         
         eleList = []
-        for iHash,iNews in nEle.inList.items():
+        for iHash,iNews in nEle.inDict.items():
             if iNews.valid():
                 eleList.append({
                     'date':str(iNews.date),
@@ -53,7 +53,7 @@ class JsonStrVistor(Vistor):
         pEle:element_of_group.PricingElement)->str:
         
         eleList = []
-        for iHash,iPrice in pEle.inList.items():
+        for iHash,iPrice in pEle.inDict.items():
             if iPrice.valid():
                 eleList.append({
                     'date':str(iPrice.date),
@@ -67,7 +67,7 @@ class JsonStrVistor(Vistor):
         cN_ele:element_of_group.CarsNewsElement)->str:
         
         eleList = []
-        for iHash,iCar in cN_ele.inList.items(): 
+        for iHash,iCar in cN_ele.inDict.items(): 
             if iCar.valid():
                 eleList.append({
                 'date':str(iCar.date),

@@ -4,7 +4,7 @@ from date_utils import DateRepresentation
 from ..element import DataPoint,Element
 from .carNElement import CarNDataPoint,CarNElement
 from .NoneElement import NoneDataPoint
-from collection_vistor import Vistor
+
     
 class PricingDataPoint(DataPoint): 
     def __init__(self,date,open,high,low,close,adjClose,volume):               
@@ -34,7 +34,7 @@ class PricingDataPoint(DataPoint):
         self.__date = DateRepresentation(val)
 
     @property
-    def correspondingGroupElement(self)->Element:
+    def correspondingGroupElement(self)->type[Element]:
         return PricingElement        
     
     @property
@@ -56,7 +56,7 @@ class PricingDataPoint(DataPoint):
     
   
     @classmethod
-    def getGroupElement(cls,points:list[DataPoint])->Element: 
+    def getGroupElement(cls,points:list[DataPoint])->PricingElement: 
         return PricingElement(points)  
         
     def getTypeGroupElement(cls)->type[Element]:
@@ -66,18 +66,18 @@ class PricingDataPoint(DataPoint):
 
 class PricingElement(Element):
     def __init__(self,points:list[PricingDataPoint]):
-        self.inList = points 
+        self.inDict = points 
     
     @property    
     def pointType(self)->type[DataPoint]: 
         return PricingDataPoint  
          
     @property
-    def inList(self)->dict[int,PricingDataPoint]: 
+    def inDict(self)->dict[int,PricingDataPoint]: 
         return self.__element
     
-    @inList.setter
-    def inList(self,val:list[DataPoint]):
+    @inDict.setter
+    def inDict(self,val:list[DataPoint]):
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,PricingDataPoint):
@@ -89,17 +89,17 @@ class PricingElement(Element):
     @property
     def dates(self)->list[DateRepresentation]:
         thisDates = []
-        for iEle in self.inList.values(): 
+        for iEle in self.inDict.values(): 
             thisDates.append(iEle.date)
         return thisDates
 
 
-    def acceptVistor(self,v:Vistor):
+    def acceptVistor(self,v):
         return v.visitPricingElement(self)    
 
     def acceptOutVistor(
         self,
-        v:Vistor,
+        v,
         dest:str): 
         return v.visitOutPricingElement(self,dest)
     
@@ -144,7 +144,7 @@ class PricingElement(Element):
     
     def getPointFrom(self,date:DateRepresentation)->PricingDataPoint:
         hashStr = ("12"+str(date).replace('-',''))        
-        return self.inList.get(int(hashStr),NoneDataPoint)    
+        return self.inDict.get(int(hashStr),NoneDataPoint)    
     
 
     @classmethod

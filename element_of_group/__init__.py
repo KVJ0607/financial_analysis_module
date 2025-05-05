@@ -6,8 +6,8 @@ from .data_elements.NoneElement import NoneDataPoint,NoneElement
 from group_operators import CarsNewsDataPoint,CarsNewsElement
 
 
-__all__ = ["DataPoint","Element",
-           "CarNDataPoint","CarNElement",
+__all__ = ["DataPoint", "Element",
+            "CarNDataPoint","CarNElement",
            "NoneDataPoint","NoneElement",
            "PricingDataPoint","PricingElement",
            "NewsDataPoint","NewsElement",

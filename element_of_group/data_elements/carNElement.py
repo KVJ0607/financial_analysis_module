@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from date_utils import DateRepresentation
 from element_of_group.element import DataPoint,Element
-from collection_vistor import Vistor
 
 class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
@@ -25,7 +24,7 @@ class CarNDataPoint(DataPoint):
         return self.__date
 
     @property
-    def correspondingGroupElement(self)->Element:
+    def correspondingGroupElement(self)->type[Element]:
         return CarNElement        
                 
     @property
@@ -73,18 +72,18 @@ class CarNDataPoint(DataPoint):
             
 class CarNElement(Element):
     def __init__(self,points:list[CarNDataPoint]):
-        self.inList = points        
+        self.inDict = points        
     
     @property
     def pointType(self)->type[DataPoint]: 
         return CarNDataPoint
     
     @property
-    def inList(self)->dict[int,CarNDataPoint]:
+    def inDict(self)->dict[int,CarNDataPoint]:
         return self.__element
     
-    @inList.setter
-    def inList(self,val:list[CarNDataPoint]): 
+    @inDict.setter
+    def inDict(self,val:list[CarNDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,CarNDataPoint):
@@ -94,12 +93,12 @@ class CarNElement(Element):
 
 
     
-    def acceptVistor(self,v:Vistor):
+    def acceptVistor(self,v):
         return v.visitCarNElement(self)            
 
     def acceptOutVistor(
         self,
-        v:Vistor,
+        v,
         dest:str): 
         return v.visitOutCarNElement(self,dest)
             

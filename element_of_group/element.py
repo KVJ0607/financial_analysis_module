@@ -3,7 +3,6 @@ from abc import ABC,abstractmethod
 
 
 from date_utils.dateRepresentation import DateRepresentation
-from collection_vistor import Vistor
 
 class DataPoint(ABC):        
 
@@ -24,7 +23,7 @@ class DataPoint(ABC):
 
     @property
     @abstractmethod
-    def correspondingGroupElement(self)->Element:
+    def correspondingGroupElement(self)->type[Element]:                        
         pass        
     
                 
@@ -58,24 +57,27 @@ class Element(ABC):
                                
     @property         
     @abstractmethod
-    def inList(self)->dict[int,DataPoint]: 
+    def inDict(self)->dict[int,DataPoint]: 
         """set containing valid DataPoint. Return an empty
-        set if there is no valid DataPoint"""
+        dict if there is no valid DataPoint"""
         pass 
 
 
     @abstractmethod
     def acceptVistor(
         self,
-        v:Vistor):
+        v):
         pass
 
     @abstractmethod
     def acceptOutVistor(
         self,
-        v:Vistor,
+        v,
         dest:str): 
+        """call the corrsponding method in v
+        """        
         pass 
+
 
     @classmethod
     @abstractmethod
@@ -84,9 +86,7 @@ class Element(ABC):
         targetClass:type[Element]
         )->bool:
         pass 
-    
-    
-                    
+                       
     
     @abstractmethod
     def convertTo(self,targetClass:type[Element])->Element:
@@ -97,6 +97,9 @@ class Element(ABC):
     @classmethod
     @abstractmethod
     def getConveribleClasses(cls)->list[type[Element]]:
+        """Return a list of type[Element] that can be 
+        converted by this Element class
+        """        
         pass 
         
 

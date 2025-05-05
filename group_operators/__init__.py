@@ -1,6 +1,6 @@
-from .collectionOperator import CollectionOperator
-from .collection_operators.carNewsOperator import CarNewsOperator
-from .collection_operators.carNewsOperator import CarsNewsDataPoint,CarsNewsElement
+from .operator import CollectionOperator
+from .operators.carNewsOperator import CarNewsOperator
+from .operators.carNewsOperator import CarsNewsDataPoint,CarsNewsElement
 
 
 __all__ = ["CollectionOperator","CarNewsOperator","CarsNewsDataPoint","CarsNewsElement"]

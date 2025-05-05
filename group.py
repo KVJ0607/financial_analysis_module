@@ -64,7 +64,7 @@ class Group:
 
     def updateCayleyTableWithGroupElements(self,*args):
         unseenClass = []
-        for iArg in args: 
+        for iArg in args:             
             if isinstance(iArg,element_of_group.Element): 
                 unseenClass.append(type(iArg))
                 self.__cayleyTable[type(iArg)] = iArg   
@@ -78,12 +78,12 @@ class Group:
         
         allCombination = self.__getAllCrossSignature(unseenClass)
         seenCombination = list()
+        
         while allCombination:
-            iCombination = allCombination[0]
-            allCombination.remove(iCombination)             
-            eleclassA = iCombination.pop()
-            eleclassB = iCombination.pop()
-            if iCombination not in seenCombination:
+            iCombination = allCombination.pop()            
+            if iCombination not in seenCombination:                
+                eleclassA = iCombination.pop()
+                eleclassB = iCombination.pop()
                 dotProduct = self.__dot(eleclassA,eleclassB)
                 seenCombination.append(set([eleclassA,eleclassB]))
                 if not isinstance(dotProduct,element_of_group.NoneElement):                    
@@ -96,10 +96,10 @@ class Group:
         unseenClasses:list[type[element_of_group.Element]])->list[set[element_of_group.Element]]:
         
         allCombination = []
-        currentValuedClasses = self.valuedSubgroup        
-        for iC in currentValuedClasses: 
+        for iC in self.valuedSubgroup: 
             for jC in unseenClasses: 
-                if iC != jC: 
+                if (iC != jC 
+                    and set([jC,iC]) not in allCombination):                     
                     allCombination.append(set([iC,jC]))
         return allCombination
         
@@ -118,10 +118,14 @@ class Group:
                 self.updateCayleyTableWithGroupElements(converted)
                 return True  
         
+        
+        
+        
         targetOperator = (group_operators.CollectionOperator.
-                          getEleOperator(elementClass))
+                          getOperator(elementClass))
         if targetOperator is not None: 
-            for iSig in targetOperator.signature(): 
+            print(f"in Group: found targetOperator: {targetOperator}")
+            for iSig in targetOperator.signatures(): 
                 if iSig.issubset(set(self.valuedSubgroup)): 
                     operantClassA = iSig.pop()
                     operantClassB= iSig.pop()
@@ -188,7 +192,7 @@ class Group:
                     self.getElement(classB))     
         
                 return targetEle                
-        return element_of_group.NoneElement
+        return element_of_group.NoneElement()
     
             
     def joinGroupTable(self,groupB:Group):    
@@ -221,26 +225,25 @@ class Group:
         for iClass in firstGroup.valuedSubgroup:
             hashInFirstGroup = set(
                 firstGroup.getElement(iClass).
-                inList.keys()
+                inDict.keys()
             )
                         
             hashsInOtherGroups =[]
-            for JGroup in groups[1:]:
-                JGroup:Group
+            for jGroup in groups[1:]:
+                jGroup:Group
                 hashsInOtherGroups.append(
-                    JGroup.getElement(iClass).inList.keys()
+                    jGroup.getElement(iClass).inDict.keys()
                     )
                 
             hashsIntersection = (
                 hashInFirstGroup.intersection(hashsInOtherGroups)                    
             )
             
-            for JGroup in groups: 
-                hashInJGroup = set(
-                    JGroup.getElement(iClass).inList.keys()
-                )
-                iBadHash = hashInJGroup.difference(hashsIntersection)
-                iEleInJGroup = JGroup.getElement(iClass).inList
+            for jGroup in groups: 
+                iEleInJGroup:dict = jGroup.getElement(iClass).inDict
+                goodPoints = [v for k,v in iEleInJGroup.items() if k in hashsIntersection]
+                goodElement = iClass(goodPoints)
+                jGroup.cayleyTable[iClass] = goodElement
                 
                 
         
@@ -273,11 +276,11 @@ class Group:
                 spaceOfClass} data""")
         
         products= []            
-        for aHash in spaceElementA.inList: 
-            if aHash in spaceElementB.inList: 
+        for aHash in spaceElementA.inDict: 
+            if aHash in spaceElementB.inDict: 
                 products.append(pointwiseOperation(
-                    spaceElementA.inList[aHash],
-                    spaceElementB.inList[aHash]
+                    spaceElementA.inDict[aHash],
+                    spaceElementB.inDict[aHash]
                 ))
         return type(spaceElementA)(products)
                     

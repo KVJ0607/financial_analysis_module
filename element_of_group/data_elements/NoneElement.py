@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from date_utils import DateRepresentation
 from element_of_group.element import DataPoint,Element
-from collection_vistor import Vistor
 
         
 class NoneDataPoint(DataPoint): 
@@ -25,7 +24,7 @@ class NoneDataPoint(DataPoint):
         return self.__date
   
     @property
-    def correspondingGroupElement(self)->Element:
+    def correspondingGroupElement(self)->type[Element]:
         return NoneElement        
 
     
@@ -51,16 +50,16 @@ class NoneElement(Element):
         return NoneDataPoint
     
     @property
-    def inList(self)->dict[int,NoneDataPoint]:
+    def inDict(self)->dict[int,NoneDataPoint]:
         return dict()
 
 
-    def acceptVistor(self,v:Vistor):
+    def acceptVistor(self,v):
         return v.visitNoneElement(self)
 
     def acceptOutVistor(
         self,
-        v:Vistor,
+        v,
         dest:str): 
         return v.visitOutNoneElement(self,dest)        
         

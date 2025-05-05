@@ -1,5 +1,4 @@
 import copy
-import math
 
 from group_creator import PricingCollectionCreator,NewsCollectionCreator
 from group import Group
@@ -13,11 +12,8 @@ newsSentiment = NewsCollectionCreator.getInstacnefrom("example_data/sentiment/te
 firstTractorA.joinGroupTable(newsSentiment)
 firstTractorH.joinGroupTable(newsSentiment)
 
-for i in firstTractorA.valuedSubgroup: 
-    print("valued ",i)
 
-def carDiff(gPointA,gPointB): 
-    
+def carDiff(gPointA,gPointB):     
     newPoint = copy.copy(gPointA)
     cardiff = gPointA.cumulativeAbnormalReturn-gPointB.cumulativeAbnormalReturn
     if cardiff < 0 : 
