@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from date_utils import DateRepresentation
-from ..dataPoint import DataPoint,Element
-from .carNDataPoint import CarNDataPoint,CarNElement
-from .NoneDataPoint import NoneDataPoint
+from ..element import DataPoint,Element
+from .carNElement import CarNDataPoint,CarNElement
+from .NoneElement import NoneDataPoint
 from collection_vistor import Vistor
     
 class PricingDataPoint(DataPoint): 
@@ -54,7 +56,7 @@ class PricingDataPoint(DataPoint):
     
   
     @classmethod
-    def getGroupElement(cls,points:list['DataPoint'])->Element: 
+    def getGroupElement(cls,points:list[DataPoint])->Element: 
         return PricingElement(points)  
         
     def getTypeGroupElement(cls)->type[Element]:
@@ -67,7 +69,7 @@ class PricingElement(Element):
         self.inList = points 
     
     @property    
-    def type(self)->type[DataPoint]: 
+    def pointType(self)->type[DataPoint]: 
         return PricingDataPoint  
          
     @property
@@ -103,15 +105,15 @@ class PricingElement(Element):
     
     
     @classmethod
-    def convertible(cls,targetClass:type[DataPoint])->bool:
-        if targetClass == CarNDataPoint:
+    def convertible(cls,targetClass:type[Element])->bool:
+        if targetClass == CarNElement:
             return True
         else: 
             return False
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'Element':
-        if targetClass == CarNDataPoint:
+    def convertTo(self,targetClass:type[Element])->Element:
+        if targetClass == CarNElement:
             return self.__convertToCarNColl()  
         
         
@@ -146,5 +148,5 @@ class PricingElement(Element):
     
 
     @classmethod
-    def getConvertResultClasses(cls)->list[DataPoint]:
-        return [CarNDataPoint]    
+    def getConveribleClasses(cls)->list[type[Element]]:
+        return [CarNElement]    

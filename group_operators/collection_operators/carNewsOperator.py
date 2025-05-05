@@ -6,25 +6,21 @@ from __future__ import annotations
 
 
 from ..collectionOperator import CollectionOperator
-from point import DataPoint,Element,NoneDataPoint,CarNDataPoint,CarNElement,NewsNewsDataPoint,NewsElement,PricingDataPoint
+from element_of_group import DataPoint,Element,NoneDataPoint,CarNDataPoint,CarNElement,NewsElement,PricingElement
 from date_utils import DateRepresentation
 from collection_vistor import Vistor
 
 class CarNewsOperator(CollectionOperator): 
-    """
-    A class that provide a classmethod that acts as a operator between dataCollections 
-    with cars and news data points.    
-    """
 
     @property
-    def pointClassToBeReturned(self):
-        return CarsNewsDataPoint         
+    def productClass(self)->type[Element]:
+        return CarsNewsElement         
 
     @classmethod
     def match(
         cls,
-        classA:type[DataPoint],
-        classB:type[DataPoint])->bool:
+        classA:type[Element],
+        classB:type[Element])->bool:
         eSignature = set([classA,classB])
         for iSignature in cls.signature(): 
             if iSignature == eSignature: 
@@ -38,12 +34,12 @@ class CarNewsOperator(CollectionOperator):
         gEleA:Element,
         gEleB:Element,
         )->Element: 
-        eSignature = set([gEleA.type,gEleB.type])    
+        eSignature = set([type(gEleA),type(gEleB)])    
         for iSignature in cls.signature():
             if iSignature == eSignature: 
-                if eSignature == set([CarNDataPoint,NewsNewsDataPoint]):
+                if eSignature == set([CarNElement,NewsElement]):
                     return cls.__defaultOperator(gEleA,gEleB)  
-                elif eSignature == set([PricingDataPoint,NewsNewsDataPoint]):
+                elif eSignature == set([PricingElement,NewsElement]):
                     return cls.__pricingOperator(gEleA,gEleB)
                 
             
@@ -52,8 +48,8 @@ class CarNewsOperator(CollectionOperator):
     @classmethod
     def signature(cls)->list[set]: 
         signatures = []
-        signatures.append(set([CarNDataPoint,NewsNewsDataPoint]))
-        signatures.append(set([PricingDataPoint,NewsNewsDataPoint]))
+        signatures.append(set([CarNElement,NewsElement]))
+        signatures.append(set([PricingElement,NewsElement]))
         return signatures
     
     
@@ -65,12 +61,12 @@ class CarNewsOperator(CollectionOperator):
         carEle:CarNElement = None 
         newsEle:NewsElement = None
                 
-        if (gEleA.type == CarNDataPoint
-            and gEleB.type == NewsNewsDataPoint): 
+        if (type(gEleA) == CarNElement
+            and type(gEleB) == NewsElement): 
             carEle = gEleA 
             newsEle = gEleB
-        elif (gEleB.type == CarNDataPoint
-            and gEleA.type == NewsNewsDataPoint): 
+        elif (type(gEleB) == CarNElement
+            and type(gEleA) == NewsElement): 
             carEle = gEleB
             newsEle = gEleA
         else: 
@@ -97,7 +93,7 @@ class CarNewsOperator(CollectionOperator):
                         accumlatedSentimentalScore)
                 )                        
         except Exception as e: 
-            print(F"Error: {gEleA.type} and {gEleB.type}")
+            print(F"Error: {type(gEleA)} and {type(gEleB)}")
             raise e
                 
         return CarsNewsDataPoint.getGroupElement(carNewsDataPoints)
@@ -108,13 +104,13 @@ class CarNewsOperator(CollectionOperator):
         cls,
         gEleA:Element,
         gEleB:Element) -> Element:         
-        if gEleA.type == PricingDataPoint: 
+        if type(gEleA) == PricingElement: 
             return cls.__defaultOperator(
-                gEleA.convertTo(CarNDataPoint),
+                gEleA.convertTo(CarNElement),
                 gEleB)
         else: 
             return cls.__defaultOperator(
-                gEleB.convertTo(CarNDataPoint),
+                gEleB.convertTo(CarNElement),
                 gEleA)            
             
 
@@ -131,7 +127,7 @@ class CarsNewsDataPoint(DataPoint):
             self.accumlatedSentimentalScore = None
         
     def __hash__(self): 
-        return CarNDataPoint.__hash__()*1000+NewsNewsDataPoint.__hash__()
+        return self.carN.__hash__()
     
     @property
     def date(self)->DateRepresentation:
@@ -139,21 +135,12 @@ class CarsNewsDataPoint(DataPoint):
     
     def valid(self)->bool:  
         return (self.date.isValid() 
-                and isinstance(self.accumlatedSentimentalScore,float))
-        
-    @classmethod            
-    def equivalent(cls,*arg)->bool: 
-        coordinates = set()
-        for iPoint in arg:
-            if not isinstance(iPoint,CarsNewsDataPoint): 
-                return False
-            coordinates.add(iPoint.carN.coordinate)
-        return len(coordinates) == 1
+                and isinstance(self.accumlatedSentimentalScore,float))        
     
     @classmethod
     def getGroupElement(
         cls,
-        points:list['DataPoint'])->CarsNewsElement: 
+        points:list[CarsNewsDataPoint])->CarsNewsElement: 
         return  CarsNewsElement(points)
 
 
@@ -164,7 +151,7 @@ class CarsNewsElement(Element):
         self.inList = points 
         
     @property
-    def type(self)->type[DataPoint]: 
+    def pointType(self)->type[DataPoint]: 
         return CarsNewsDataPoint
     
     @property
@@ -176,7 +163,7 @@ class CarsNewsElement(Element):
         validPoints = dict()
         for iPoint in val: 
             if iPoint.valid() and isinstance(iPoint,CarsNewsDataPoint):
-                validPoints[iPoint.carN.__hash__()] = iPoint
+                validPoints[iPoint.__hash__()] = iPoint
         self.__element = validPoints            
 
 
@@ -192,14 +179,14 @@ class CarsNewsElement(Element):
         
 
     @classmethod
-    def convertible(cls,targetClass:type[DataPoint])->bool:
+    def convertible(cls,targetClass:type[Element])->bool:
         return False 
     
-    def convertTo(self,targetClass:type[DataPoint])->'Element':
+    def convertTo(self,targetClass:type[Element])->'Element':
         pass     
          
     @classmethod
-    def getConvertResultClasses(cls)->list[DataPoint]:
+    def getConveribleClasses(cls)->list[DataPoint]:
         return []    
             
 

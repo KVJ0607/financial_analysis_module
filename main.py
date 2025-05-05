@@ -3,7 +3,7 @@ import math
 
 from group_creator import PricingCollectionCreator,NewsCollectionCreator
 from group import Group
-import point
+import element_of_group
 
 firstTractorH = PricingCollectionCreator.getInstacnefrom("example_data/hshare/0038.HK.csv")
 firstTractorA = PricingCollectionCreator.getInstacnefrom("example_data/ashare/601038.SH.csv")
@@ -31,7 +31,7 @@ comparisonGroup = Group(
     Group.operateElementwiseInAClassSpace(
         firstTractorA,
         firstTractorH,
-        point.CarNDataPoint,
+        element_of_group.CarNElement,
         carDiff)
 )
 

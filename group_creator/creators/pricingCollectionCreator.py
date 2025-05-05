@@ -2,7 +2,7 @@ import csv
 
 from ..creator import Creator
 from date_utils import DateRepresentation
-from point import NoneDataPoint,PricingDataPoint
+from element_of_group import NoneDataPoint,PricingDataPoint
 from group import Group
 from shareEntity import ShareEntity
 

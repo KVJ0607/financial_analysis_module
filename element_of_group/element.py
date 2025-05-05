@@ -2,8 +2,6 @@ from __future__ import annotations
 from abc import ABC,abstractmethod
 
 
-from typing import Callable
-
 from date_utils.dateRepresentation import DateRepresentation
 from collection_vistor import Vistor
 
@@ -54,13 +52,9 @@ class Element(ABC):
     
     @property
     @abstractmethod
-    def type(self)->type[DataPoint]: 
+    def pointType(self)->type[DataPoint]: 
         pass 
 
-    @property
-    def type_InStr(self)->str: 
-        return self.type.__name__
-    
                                
     @property         
     @abstractmethod
@@ -87,7 +81,7 @@ class Element(ABC):
     @abstractmethod
     def convertible(
         cls,
-        targetClass:type[DataPoint]
+        targetClass:type[Element]
         )->bool:
         pass 
     
@@ -95,14 +89,14 @@ class Element(ABC):
                     
     
     @abstractmethod
-    def convertTo(self,targetClass:type[DataPoint])->'Element':
+    def convertTo(self,targetClass:type[Element])->Element:
         pass 
 
 
     
     @classmethod
     @abstractmethod
-    def getConvertResultClasses(cls)->list[DataPoint]:
+    def getConveribleClasses(cls)->list[type[Element]]:
         pass 
         
 

@@ -1,14 +1,14 @@
 import json
 
 from ..vistor import Vistor
-import point
+import element_of_group
 import csv
 
 class CsvVistor(Vistor):
         
     def visitCarNElement(
         self,
-        cEle: point.CarNElement)->list[list[str]]:
+        cEle: element_of_group.CarNElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN"]]
         for iHash, iCar in cEle.inList.items():
@@ -25,7 +25,7 @@ class CsvVistor(Vistor):
 
     def visitNewsElement(
         self,
-        nEle: point.NewsElement)->list[list[str]]:
+        nEle: element_of_group.NewsElement)->list[list[str]]:
         
         eleList = [["date", "siteAddress", "sentimentalScore"]]
         for iHash, iNews in nEle.inList.items():
@@ -40,12 +40,12 @@ class CsvVistor(Vistor):
 
     def visitNoneElement(
         self,
-        nEle: point.NoneElement)->list:
+        nEle: element_of_group.NoneElement)->list:
         return []
 
     def visitPricingElement(
         self,
-        pEle: point.PricingElement)->list[list[str]]:
+        pEle: element_of_group.PricingElement)->list[list[str]]:
         
         eleList = [["date", "adjusted_close"]]
         for iHash, iPrice in pEle.inList.items():
@@ -59,7 +59,7 @@ class CsvVistor(Vistor):
 
     def visitCarsNewsElement(
         self,
-        cN_ele: point.CarsNewsElement)->list[list[str]]:
+        cN_ele: element_of_group.CarsNewsElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN", "SentimentalScore"]]
         for iHash, iCar in cN_ele.inList.items():

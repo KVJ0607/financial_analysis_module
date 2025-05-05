@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from point import DataPoint,Element
+from element_of_group import Element
 
 
 
@@ -19,7 +19,7 @@ class CollectionOperator(ABC) :
     
     @property
     @abstractmethod
-    def pointClassToBeReturned(self):
+    def productClass(self):
         pass 
         
         
@@ -27,8 +27,8 @@ class CollectionOperator(ABC) :
     @abstractmethod
     def match(
         cls,
-        classA:type[DataPoint],
-        classB:type[DataPoint])->bool: 
+        classA:type[Element],
+        classB:type[Element])->bool: 
         """
         Check if the two DataCollection are compatible 
         for the operator. 
@@ -55,9 +55,9 @@ class CollectionOperator(ABC) :
         pass 
     
     @classmethod
-    def getEleOperator(cls,targetClass:type[DataPoint])->type[CollectionOperator] | None:    
+    def getEleOperator(cls,targetClass:type[Element])->type[CollectionOperator] | None:    
         for subclass in cls.__subclasses__():
-            if targetClass == subclass.pointClassToBeReturned:
+            if targetClass == subclass.productClass:
                 return subclass
         return None 
     

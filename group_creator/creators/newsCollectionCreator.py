@@ -2,7 +2,7 @@ import csv
 
 from ..creator import Creator
 from date_utils import DateRepresentation
-from point import NoneDataPoint,NewsNewsDataPoint
+from element_of_group import NoneDataPoint,NewsDataPoint
 from group import Group
 from shareEntity import ShareEntity              
                 
@@ -15,7 +15,7 @@ class NewsCollectionCreator(Creator):
         return cls.getInstacnefromCsv(fileName)
     
     @classmethod
-    def getInstacnefromCsv(cls, fileName=str,isHeading=True,shareCode='',dateIndex=0,siteAddressIndex=1,sentimentalScoreIndex=2)->NewsNewsDataPoint:
+    def getInstacnefromCsv(cls, fileName=str,isHeading=True,shareCode='',dateIndex=0,siteAddressIndex=1,sentimentalScoreIndex=2)->Group:
         "fileName: a csv file with the date,siteAddress,sentimentalScore"
         collections = []
         with open(fileName,mode='r') as infile: 
@@ -30,16 +30,16 @@ class NewsCollectionCreator(Creator):
                     cls._enum[0],
                     DateRepresentation.getNullInstance()
                 )
-                newDataPoint = NewsNewsDataPoint(
+                newsDataPoint = NewsDataPoint(
                     date,
                     row_dict.get(cls._enum[1],NoneDataPoint(date)),
                     row_dict.get(cls._enum[2],NoneDataPoint(date))
                 )
-                if newDataPoint.valid():
-                    collections.append(newDataPoint)
+                if newsDataPoint.valid():
+                    collections.append(newsDataPoint)
                 
         shareEntity = ShareEntity.createShareCode(shareCode)     
-        return Group(shareEntity,NewsNewsDataPoint.getGroupElement(collections))
+        return Group(shareEntity,NewsDataPoint.getGroupElement(collections))
     
     @classmethod
     def _getKeyList(cls,dateIndex:int,siteAddressIndex:int,sentimentalScoreIndex:int)->list: 

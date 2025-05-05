@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from date_utils import DateRepresentation
-from ..dataPoint import DataPoint,Element
-from .NoneDataPoint import NoneDataPoint        
+from ..element import DataPoint,Element
+from .NoneElement import NoneDataPoint        
 from collection_vistor import Vistor
 
-class NewsNewsDataPoint(DataPoint): 
+class NewsDataPoint(DataPoint): 
     
     
     def __init__(self,date,siteAddress:str,sentimentalScore:int|str|float):   
@@ -46,7 +48,7 @@ class NewsNewsDataPoint(DataPoint):
                 and isinstance(self.sentimentalScore,float))
     
     @classmethod
-    def getGroupElement(cls, points:list['NewsNewsDataPoint']):
+    def getGroupElement(cls, points:list[NewsDataPoint]):
         return NewsElement(points)
 
     def getTypeGroupElement(cls)->type[Element]:
@@ -55,22 +57,22 @@ class NewsNewsDataPoint(DataPoint):
     
 
 class NewsElement(Element):
-    def __init__(self,points:list[NewsNewsDataPoint]):
+    def __init__(self,points:list[NewsDataPoint]):
         self.inList = points        
     
     @property
-    def type(self)->type[DataPoint]: 
-        return NewsNewsDataPoint
+    def pointType(self)->type[DataPoint]: 
+        return NewsDataPoint
     
     @property
-    def inList(self)->dict[int,NewsNewsDataPoint]:
+    def inList(self)->dict[int,NewsDataPoint]:
         return self.__element
     
     @inList.setter
-    def inList(self,val:list[NewsNewsDataPoint]): 
+    def inList(self,val:list[NewsDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
-            if isinstance(iPoint,NewsNewsDataPoint):
+            if isinstance(iPoint,NewsDataPoint):
                 if iPoint.valid():
                     validPoints[iPoint.__hash__()]=(iPoint)
         self.__element = validPoints
@@ -88,19 +90,19 @@ class NewsElement(Element):
 
                 
     @classmethod
-    def convertible(cls,targetClass:type[DataPoint])->bool:
+    def convertible(cls,targetClass:type[Element])->bool:
         return False 
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'Element':
+    def convertTo(self,targetClass:type[Element])->Element:
         pass     
     
-    def getPointFrom(self,date:DateRepresentation)->NewsNewsDataPoint: 
+    def getPointFrom(self,date:DateRepresentation)->NewsDataPoint: 
         hashStr = ("14" 
                     +str(date).replace('-',''))
         return self.inList.get(int(hashStr),NoneDataPoint)
     
     
     @classmethod
-    def getConvertResultClasses(cls)->list[DataPoint]:
+    def getConveribleClasses(cls)->list[type[Element]]:
         return []        

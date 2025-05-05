@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from date_utils import DateRepresentation
-from point.dataPoint import DataPoint,Element
+from element_of_group.element import DataPoint,Element
 from collection_vistor import Vistor
 
 class CarNDataPoint(DataPoint):     
@@ -63,7 +63,7 @@ class CarNDataPoint(DataPoint):
 
 
     @classmethod
-    def getGroupElement(cls, points:list['CarNDataPoint']):
+    def getGroupElement(cls, points:list[CarNDataPoint]):
         return CarNElement(points)
 
     @classmethod
@@ -76,7 +76,7 @@ class CarNElement(Element):
         self.inList = points        
     
     @property
-    def type(self)->type[DataPoint]: 
+    def pointType(self)->type[DataPoint]: 
         return CarNDataPoint
     
     @property
@@ -104,15 +104,15 @@ class CarNElement(Element):
         return v.visitOutCarNElement(self,dest)
             
     @classmethod
-    def convertible(cls,targetClass:type[DataPoint])->bool:
+    def convertible(cls,targetClass:type[Element])->bool:
         return False 
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'Element':
+    def convertTo(self,targetClass:type[Element])->Element:
         pass     
     
     @classmethod
-    def getConvertResultClasses(cls)->list[DataPoint]:
+    def getConveribleClasses(cls)->list[type[Element]]:
         return []
             
     
