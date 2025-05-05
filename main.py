@@ -1,12 +1,10 @@
 import copy
 
-from group_creator import PricingCollectionCreator,NewsCollectionCreator
-from group import Group
-import element_of_group
+import finGp
 
-firstTractorH = PricingCollectionCreator.getInstacnefrom("example_data/hshare/0038.HK.csv")
-firstTractorA = PricingCollectionCreator.getInstacnefrom("example_data/ashare/601038.SH.csv")
-newsSentiment = NewsCollectionCreator.getInstacnefrom("example_data/sentiment/test_data.csv")
+firstTractorH = finGp.group_creator.PricingCollectionCreator.getInstacnefrom("example_data/hshare/0038.HK.csv")
+firstTractorA = finGp.group_creator.PricingCollectionCreator.getInstacnefrom("example_data/ashare/601038.SH.csv")
+newsSentiment = finGp.group_creator.NewsCollectionCreator.getInstacnefrom("example_data/sentiment/test_data.csv")
 
 
 firstTractorA.joinGroupTable(newsSentiment)
@@ -22,13 +20,15 @@ def carDiff(gPointA,gPointB):
     return newPoint
     
 
-comparisonGroup = Group(
+comparisonGroup = finGp.Group(
     firstTractorA.shareEntity,
-    Group.operateElementwiseInAClassSpace(
+    finGp.Group.operateElementwiseInAClassSpace(
         firstTractorA,
         firstTractorH,
-        element_of_group.CarNElement,
+        finGp.element_of_group.CarNElement,
         carDiff)
 )
+
+
 
 

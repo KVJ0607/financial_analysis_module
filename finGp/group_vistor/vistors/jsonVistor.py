@@ -1,7 +1,7 @@
 import json
 
 from ..vistor import Vistor
-import element_of_group
+from ... import element_of_group
 
 class JsonStrVistor(Vistor):
     

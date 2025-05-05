@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Type,Callable
 
-from shareEntity import ShareEntity
-import element_of_group
+from .shareEntity import ShareEntity
+from . import element_of_group
 
-import group_operators
+from .import group_operators
 
 
 
@@ -215,28 +215,32 @@ class Group:
         cls,
         *args
     ): 
-        groups = list(args)
+        groups:list[Group] = list(args)
+        
         if len(groups) <2: 
             raise Exception()
-        if not isinstance(groups[0],Group): 
-            raise TypeError("args have to be objects of type Group")
-        firstGroup = groups[0]
         
-        for iClass in firstGroup.valuedSubgroup:
-            hashInFirstGroup = set(
+        firstGroup = groups[0]
+                
+        commonValuedGroup = set(
+            firstGroup.valuedSubgroup.keys()
+        ).intersection([x.valuedSubgroup.keys() for x in groups[1:]])
+        
+        for iClass in commonValuedGroup:
+            hashSetInFirstGroup = set(
                 firstGroup.getElement(iClass).
                 inDict.keys()
             )
                         
-            hashsInOtherGroups =[]
+            hashSetsInOtherGroups =[]
             for jGroup in groups[1:]:
                 jGroup:Group
-                hashsInOtherGroups.append(
+                hashSetsInOtherGroups.append(
                     jGroup.getElement(iClass).inDict.keys()
                     )
                 
             hashsIntersection = (
-                hashInFirstGroup.intersection(hashsInOtherGroups)                    
+                hashSetInFirstGroup.intersection(hashSetsInOtherGroups)                    
             )
             
             for jGroup in groups: 

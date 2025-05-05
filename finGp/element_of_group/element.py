@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC,abstractmethod
 
 
-from date_utils.dateRepresentation import DateRepresentation
+from ..date_utils.dateRepresentation import DateRepresentation
 
 class DataPoint(ABC):        
 

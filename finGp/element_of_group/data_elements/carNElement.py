@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from date_utils import DateRepresentation
-from element_of_group.element import DataPoint,Element
+from ...date_utils import DateRepresentation
+from ...element_of_group.element import DataPoint,Element
 
 class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 

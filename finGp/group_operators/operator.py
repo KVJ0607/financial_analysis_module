@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from element_of_group import Element
 
 
 
@@ -27,8 +26,8 @@ class CollectionOperator(ABC) :
     @abstractmethod
     def match(
         cls,
-        classA:type[Element],
-        classB:type[Element])->bool: 
+        classA,
+        classB)->bool: 
         """
         Check if the two DataCollection are compatible 
         for the operator. 
@@ -40,8 +39,8 @@ class CollectionOperator(ABC) :
     @abstractmethod
     def dot(
         cls,
-        leftOperand:Element,
-        rightOperand:Element)->Element:
+        leftOperand,
+        rightOperand):
         """
         The dot method is a classmethod that acts as a
         operator of Element. It will return a new
@@ -61,7 +60,7 @@ class CollectionOperator(ABC) :
     @classmethod 
     def getOperator(
         cls,
-        targetClass:type[Element])->type[CollectionOperator]:
+        targetClass)->type[CollectionOperator]:
         for subclass in cls.__subclasses__():
             if targetClass == subclass.productClass:
                 return subclass
