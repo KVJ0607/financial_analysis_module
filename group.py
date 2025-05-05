@@ -9,7 +9,7 @@ import group_operators
 
 
 
-class CollectionGroup:   
+class Group:   
 
     def __init__(
         self,
@@ -50,11 +50,11 @@ class CollectionGroup:
                                   
 
     @property
-    def cayleyTable(self)->dict[type[point.DataPoint],'CollectionGroup']:
+    def cayleyTable(self)->dict[type[point.DataPoint],'Group']:
         return self.__cayleyTable
     
     @property
-    def valuedSubgroup(self)->dict[type[point.DataPoint],'CollectionGroup']:
+    def valuedSubgroup(self)->dict[type[point.DataPoint],'Group']:
         valuedCayleyTable = dict()
         for iClass,iEle in self.__cayleyTable.items(): 
             if not self.nullElementClass(iClass): 
@@ -65,9 +65,9 @@ class CollectionGroup:
     def updateCayleyTableWithGroupElements(self,*args):
         unseenClass = []
         for iArg in args: 
-            if isinstance(iArg,point.GroupElement): 
-                unseenClass.append(iArg.eleClass)
-                self.__cayleyTable[iArg.eleClass] = iArg   
+            if isinstance(iArg,point.Element): 
+                unseenClass.append(iArg.type)
+                self.__cayleyTable[iArg.type] = iArg   
                 resultClasses = iArg.getConvertResultClasses()
                 if resultClasses:
                     for resultClass in resultClasses: 
@@ -88,12 +88,12 @@ class CollectionGroup:
                 seenCombination.append(set([eleclassA,eleclassB]))
                 if not isinstance(dotProduct,point.NoneElement):                    
                     allCombination.extend(
-                        self.__getAllCrossSignature([dotProduct.eleClass]))
-                    self.__cayleyTable[dotProduct.eleClass] = dotProduct
+                        self.__getAllCrossSignature([dotProduct.type]))
+                    self.__cayleyTable[dotProduct.type] = dotProduct
  
     def __getAllCrossSignature(
         self,
-        unseenClasses:list[type[point.DataPoint]])->list[set[point.GroupElement]]:
+        unseenClasses:list[type[point.DataPoint]])->list[set[point.Element]]:
         
         allCombination = []
         currentValuedClasses = self.valuedSubgroup        
@@ -119,7 +119,8 @@ class CollectionGroup:
                 self.updateCayleyTableWithGroupElements(converted)
                 return True  
         
-        targetOperator = group_operators.CollectionOperator.getEleOperator(elementClass)
+        targetOperator = (group_operators.CollectionOperator.
+                          getEleOperator(elementClass))
         if targetOperator is not None: 
             for iSig in targetOperator.signature(): 
                 if iSig.issubset(set(self.valuedSubgroup)): 
@@ -136,7 +137,9 @@ class CollectionGroup:
          
                     
             
-    def containElementClass(self,eleClass:Type[point.DataPoint])->bool:
+    def containElementClass(
+        self,
+        eleClass:Type[point.DataPoint])->bool:
         """
         Check if the collection group contain the element
         """
@@ -146,14 +149,17 @@ class CollectionGroup:
             return False        
         
         
-    def getElement(self,eleClass:Type[point.DataPoint])->point.GroupElement:        
+    def getElement(
+        self,
+        eleClass:Type[point.DataPoint])->point.Element:        
         """
         Get the element of the collection group
         """
         if eleClass in self.__cayleyTable: 
             return self.__cayleyTable[eleClass]
         else: 
-            raise ValueError(f"The element Class {eleClass.__name__} doesn't belong to the group")
+            raise ValueError(f"""The element Class {eleClass.__name__}
+                             doesn't belong to the group""")
     
     def nullElementClass(self,eleClass:Type[point.DataPoint])->bool: 
         return isinstance(
@@ -162,7 +168,10 @@ class CollectionGroup:
         )
                                 
     
-    def __dot(self,classA:type[point.DataPoint],classB:type[point.DataPoint])->point.GroupElement:
+    def __dot(
+        self,
+        classA:type[point.DataPoint],
+        classB:type[point.DataPoint])->point.Element:
         if (classA not in point.DataPoint.__subclasses__()
             or classB not in point.DataPoint.__subclasses__()):
             raise TypeError(f"""{classA} and {classB} should be 
@@ -181,14 +190,11 @@ class CollectionGroup:
                 return targetEle                
         return point.NoneDataPoint.getGroupElement()
     
-    # @staticmethod                                                 
-    # def getEleWithDot()
-                 
             
-    def joinGroupTable(self,groupB:CollectionGroup):    
-        if not isinstance(groupB,CollectionGroup):
+    def joinGroupTable(self,groupB:Group):    
+        if not isinstance(groupB,Group):
             raise TypeError(f"""{groupB} should be of 
-                            class {CollectionGroup} but 
+                            class {Group} but 
                             not {type(groupB)}""")
         
         elementsToBeUpdates = []
@@ -200,13 +206,54 @@ class CollectionGroup:
         self.updateCayleyTableWithGroupElements(*elementsToBeUpdates)    
 
 
+    @classmethod 
+    def normalizeAllGroups(
+        cls,
+        *args
+    ): 
+        groups = list(args)
+        if len(groups) <2: 
+            raise Exception()
+        if not isinstance(groups[0],Group): 
+            raise TypeError("args have to be objects of type Group")
+        firstGroup = groups[0]
+        
+        for iClass in firstGroup.valuedSubgroup:
+            hashInFirstGroup = set(
+                firstGroup.getElement(iClass).
+                inList.keys()
+            )
+                        
+            hashsInOtherGroups =[]
+            for JGroup in groups[1:]:
+                JGroup:Group
+                hashsInOtherGroups.append(
+                    JGroup.getElement(iClass).inList.keys()
+                    )
+                
+            hashsIntersection = (
+                hashInFirstGroup.intersection(hashsInOtherGroups)                    
+            )
+            
+            for JGroup in groups: 
+                hashInJGroup = set(
+                    JGroup.getElement(iClass).inList.keys()
+                )
+                iBadHash = hashInJGroup.difference(hashsIntersection)
+                iEleInJGroup = JGroup.getElement(iClass).inList
+                
+                
+        
+                
+    
+
     @classmethod
-    def operateOfelementInClassSpace(
+    def operateElementwiseInAClassSpace(
         self,
-        groupA:CollectionGroup,
-        groupB:CollectionGroup,
+        groupA:Group,
+        groupB:Group,
         spaceOfClass:type[point.DataPoint],
-        pointwiseOperation:Callable)->point.GroupElement:
+        pointwiseOperation:Callable)->point.Element:
         
         if not groupA.containElementClass(spaceOfClass): 
             groupA.expandGroup(spaceOfClass)
@@ -226,13 +273,13 @@ class CollectionGroup:
                 spaceOfClass} data""")
         
         products= []            
-        for aHash in spaceElementA.element: 
-            if aHash in spaceElementB.element: 
+        for aHash in spaceElementA.inList: 
+            if aHash in spaceElementB.inList: 
                 products.append(pointwiseOperation(
-                    spaceElementA.element[aHash],
-                    spaceElementB.element[aHash]
+                    spaceElementA.inList[aHash],
+                    spaceElementB.inList[aHash]
                 ))
-        return spaceElementA.eleClass.getGroupElement(products)
+        return spaceElementA.type.getGroupElement(products)
                     
                 
                 

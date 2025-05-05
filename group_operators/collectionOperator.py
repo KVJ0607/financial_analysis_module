@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from point import DataPoint,GroupElement
+from point import DataPoint,Element
 
 
 
@@ -40,8 +40,8 @@ class CollectionOperator(ABC) :
     @abstractmethod
     def dot(
         cls,
-        leftOperand:GroupElement,
-        rightOperand:GroupElement)->GroupElement:
+        leftOperand:Element,
+        rightOperand:Element)->Element:
         """
         The dot method is a classmethod that acts as a operator 
         ofdataCollections  group. It will return a new

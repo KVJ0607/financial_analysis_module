@@ -3,7 +3,7 @@ import csv
 from ..creator import Creator
 from date_utils import DateRepresentation
 from point import NoneDataPoint,PricingDataPoint
-from collectionGroup import CollectionGroup
+from group import Group
 from shareEntity import ShareEntity
 
 
@@ -12,7 +12,7 @@ class PricingCollectionCreator(Creator):
     
     
     @classmethod
-    def getInstacnefrom(cls, fileName=str)->CollectionGroup:
+    def getInstacnefrom(cls, fileName=str)->Group:
         return cls.getInstacnefromCsv(fileName)
     
     @classmethod
@@ -45,7 +45,7 @@ class PricingCollectionCreator(Creator):
                     collections.append(newDataPoint)
                                    
         shareEntity = ShareEntity.createShareCode(shareCode)
-        return CollectionGroup(shareEntity,PricingDataPoint.getGroupElement(collections))
+        return Group(shareEntity,PricingDataPoint.getGroupElement(collections))
 
     @classmethod
     def _getKeyList(cls,dateIndex,openIndex,highIndex,lowIndex,closeIndex,AdjCloseIndex,volumnIndex)->list[str]:

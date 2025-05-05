@@ -3,7 +3,7 @@ import csv
 from ..creator import Creator
 from date_utils import DateRepresentation
 from point import NoneDataPoint,NewsNewsDataPoint
-from collectionGroup import CollectionGroup
+from group import Group
 from shareEntity import ShareEntity              
                 
 
@@ -11,7 +11,7 @@ class NewsCollectionCreator(Creator):
     _enum = ['date','siteAddress','sentimentalScore']
 
     @classmethod
-    def getInstacnefrom(cls, fileName=str)->CollectionGroup:
+    def getInstacnefrom(cls, fileName=str)->Group:
         return cls.getInstacnefromCsv(fileName)
     
     @classmethod
@@ -39,7 +39,7 @@ class NewsCollectionCreator(Creator):
                     collections.append(newDataPoint)
                 
         shareEntity = ShareEntity.createShareCode(shareCode)     
-        return CollectionGroup(shareEntity,NewsNewsDataPoint.getGroupElement(collections))
+        return Group(shareEntity,NewsNewsDataPoint.getGroupElement(collections))
     
     @classmethod
     def _getKeyList(cls,dateIndex:int,siteAddressIndex:int,sentimentalScoreIndex:int)->list: 

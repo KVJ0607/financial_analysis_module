@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 from date_utils import DateRepresentation
-from point.dataPoint import DataPoint,GroupElement
+from point.dataPoint import DataPoint,Element
 from collection_vistor import Vistor
 
         
@@ -25,7 +25,7 @@ class NoneDataPoint(DataPoint):
         return self.__date
   
     @property
-    def correspondingGroupElement(self)->GroupElement:
+    def correspondingGroupElement(self)->Element:
         return NoneElement        
 
     
@@ -37,21 +37,21 @@ class NoneDataPoint(DataPoint):
     def getGroupElement(cls)->NoneElement:
         return NoneElement()
 
-    def getTypeGroupElement(cls)->type[GroupElement]:
+    def getTypeGroupElement(cls)->type[Element]:
         return NoneElement
 
 
 
-class NoneElement(GroupElement):    
+class NoneElement(Element):    
     def __init__(self):
         self.__done = True         
     
     @property
-    def eleClass(self)->type[DataPoint]: 
+    def type(self)->type[DataPoint]: 
         return NoneDataPoint
     
     @property
-    def element(self)->dict[int,NoneDataPoint]:
+    def inList(self)->dict[int,NoneDataPoint]:
         return dict()
 
 
@@ -69,7 +69,7 @@ class NoneElement(GroupElement):
         return False 
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+    def convertTo(self,targetClass:type[DataPoint])->'Element':
         pass     
     
     @classmethod

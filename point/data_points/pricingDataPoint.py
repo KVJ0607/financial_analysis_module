@@ -1,5 +1,5 @@
 from date_utils import DateRepresentation
-from ..dataPoint import DataPoint,GroupElement
+from ..dataPoint import DataPoint,Element
 from .carNDataPoint import CarNDataPoint,CarNElement
 from .NoneDataPoint import NoneDataPoint
 from collection_vistor import Vistor
@@ -32,7 +32,7 @@ class PricingDataPoint(DataPoint):
         self.__date = DateRepresentation(val)
 
     @property
-    def correspondingGroupElement(self)->GroupElement:
+    def correspondingGroupElement(self)->Element:
         return PricingElement        
     
     @property
@@ -54,28 +54,28 @@ class PricingDataPoint(DataPoint):
     
   
     @classmethod
-    def getGroupElement(cls,points:list['DataPoint'])->GroupElement: 
+    def getGroupElement(cls,points:list['DataPoint'])->Element: 
         return PricingElement(points)  
         
-    def getTypeGroupElement(cls)->type[GroupElement]:
+    def getTypeGroupElement(cls)->type[Element]:
         return PricingElement
     
     
 
-class PricingElement(GroupElement):
+class PricingElement(Element):
     def __init__(self,points:list[PricingDataPoint]):
-        self.element = points 
+        self.inList = points 
     
     @property    
-    def eleClass(self)->type[DataPoint]: 
+    def type(self)->type[DataPoint]: 
         return PricingDataPoint  
          
     @property
-    def element(self)->dict[int,PricingDataPoint]: 
+    def inList(self)->dict[int,PricingDataPoint]: 
         return self.__element
     
-    @element.setter
-    def element(self,val:list[DataPoint]):
+    @inList.setter
+    def inList(self,val:list[DataPoint]):
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,PricingDataPoint):
@@ -87,7 +87,7 @@ class PricingElement(GroupElement):
     @property
     def dates(self)->list[DateRepresentation]:
         thisDates = []
-        for iEle in self.element.values(): 
+        for iEle in self.inList.values(): 
             thisDates.append(iEle.date)
         return thisDates
 
@@ -110,12 +110,12 @@ class PricingElement(GroupElement):
             return False
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+    def convertTo(self,targetClass:type[DataPoint])->'Element':
         if targetClass == CarNDataPoint:
             return self.__convertToCarNColl()  
         
         
-    def __convertToCarNColl(self,nDay:int=3)->GroupElement|CarNElement: 
+    def __convertToCarNColl(self,nDay:int=3)->Element|CarNElement: 
         if nDay//2 == 0: 
             raise ValueError("nDay should be an odd number")
         if nDay < 1: 
@@ -142,7 +142,7 @@ class PricingElement(GroupElement):
     
     def getPointFrom(self,date:DateRepresentation)->PricingDataPoint:
         hashStr = ("12"+str(date).replace('-',''))        
-        return self.element.get(int(hashStr),NoneDataPoint)    
+        return self.inList.get(int(hashStr),NoneDataPoint)    
     
 
     @classmethod

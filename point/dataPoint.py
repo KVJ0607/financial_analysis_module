@@ -26,7 +26,7 @@ class DataPoint(ABC):
 
     @property
     @abstractmethod
-    def correspondingGroupElement(self)->GroupElement:
+    def correspondingGroupElement(self)->Element:
         pass        
     
                 
@@ -38,33 +38,33 @@ class DataPoint(ABC):
 
     @classmethod
     @abstractmethod
-    def getGroupElement(cls,points:list['DataPoint'])->GroupElement: 
+    def getGroupElement(cls,points:list['DataPoint'])->Element: 
         pass 
     
     @classmethod
     @abstractmethod
-    def getTypeGroupElement(cls)->type[GroupElement]:
+    def getTypeGroupElement(cls)->type[Element]:
         pass 
 
 
 
 
 
-class GroupElement(ABC): 
+class Element(ABC): 
     
     @property
     @abstractmethod
-    def eleClass(self)->type[DataPoint]: 
+    def type(self)->type[DataPoint]: 
         pass 
 
     @property
-    def eleClassInStr(self)->str: 
-        return self.eleClass.__name__
+    def type_InStr(self)->str: 
+        return self.type.__name__
     
                                
     @property         
     @abstractmethod
-    def element(self)->dict[int,DataPoint]: 
+    def inList(self)->dict[int,DataPoint]: 
         """set containing valid DataPoint. Return an empty
         set if there is no valid DataPoint"""
         pass 
@@ -95,7 +95,7 @@ class GroupElement(ABC):
                     
     
     @abstractmethod
-    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+    def convertTo(self,targetClass:type[DataPoint])->'Element':
         pass 
 
 

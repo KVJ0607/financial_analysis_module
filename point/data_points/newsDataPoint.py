@@ -1,5 +1,5 @@
 from date_utils import DateRepresentation
-from ..dataPoint import DataPoint,GroupElement
+from ..dataPoint import DataPoint,Element
 from .NoneDataPoint import NoneDataPoint        
 from collection_vistor import Vistor
 
@@ -25,7 +25,7 @@ class NewsNewsDataPoint(DataPoint):
         self.__date = DateRepresentation(val)
 
     @property
-    def correspondingGroupElement(self)->GroupElement:
+    def correspondingGroupElement(self)->Element:
         return NewsElement        
             
     @property
@@ -49,25 +49,25 @@ class NewsNewsDataPoint(DataPoint):
     def getGroupElement(cls, points:list['NewsNewsDataPoint']):
         return NewsElement(points)
 
-    def getTypeGroupElement(cls)->type[GroupElement]:
+    def getTypeGroupElement(cls)->type[Element]:
         return NewsElement
     
     
 
-class NewsElement(GroupElement):
+class NewsElement(Element):
     def __init__(self,points:list[NewsNewsDataPoint]):
-        self.element = points        
+        self.inList = points        
     
     @property
-    def eleClass(self)->type[DataPoint]: 
+    def type(self)->type[DataPoint]: 
         return NewsNewsDataPoint
     
     @property
-    def element(self)->dict[int,NewsNewsDataPoint]:
+    def inList(self)->dict[int,NewsNewsDataPoint]:
         return self.__element
     
-    @element.setter
-    def element(self,val:list[NewsNewsDataPoint]): 
+    @inList.setter
+    def inList(self,val:list[NewsNewsDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,NewsNewsDataPoint):
@@ -92,13 +92,13 @@ class NewsElement(GroupElement):
         return False 
     
     
-    def convertTo(self,targetClass:type[DataPoint])->'GroupElement':
+    def convertTo(self,targetClass:type[DataPoint])->'Element':
         pass     
     
     def getPointFrom(self,date:DateRepresentation)->NewsNewsDataPoint: 
         hashStr = ("14" 
                     +str(date).replace('-',''))
-        return self.element.get(int(hashStr),NoneDataPoint)
+        return self.inList.get(int(hashStr),NoneDataPoint)
     
     
     @classmethod

@@ -2,7 +2,7 @@ import copy
 import math
 
 from group_creator import PricingCollectionCreator,NewsCollectionCreator
-from collectionGroup import CollectionGroup
+from group import Group
 import point
 
 firstTractorH = PricingCollectionCreator.getInstacnefrom("example_data/hshare/0038.HK.csv")
@@ -26,11 +26,13 @@ def carDiff(gPointA,gPointB):
     return newPoint
     
 
-CollectionGroup.operateOfelementInClassSpace(
-    firstTractorA,
-    firstTractorH,
-    point.CarNDataPoint,
-    carDiff)
-
+comparisonGroup = Group(
+    firstTractorA.shareEntity,
+    Group.operateElementwiseInAClassSpace(
+        firstTractorA,
+        firstTractorH,
+        point.CarNDataPoint,
+        carDiff)
+)
 
 
