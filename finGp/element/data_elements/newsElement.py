@@ -73,7 +73,7 @@ class NewsElement(Element):
         for iPoint in val: 
             if isinstance(iPoint,NewsDataPoint):
                 if iPoint.valid():
-                    validPoints[iPoint.__hash__()]=(iPoint)
+                    validPoints[iPoint.__hash__()]= iPoint
         self.__element = validPoints
 
 

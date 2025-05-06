@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Type, Callable
 
 from .shareEntity import ShareEntity
-from . import element_of_group
-from .import group_operators
+from . import element
+from .import operator
 
 
 class Group:
@@ -30,9 +30,9 @@ class Group:
         """
         # Initialize Cayley table with NoneElement for all subclasses of Element
         cayleyTable = {}
-        for iType in element_of_group.Element.__subclasses__():
-            if iType != element_of_group.NoneElement: 
-                cayleyTable[iType] = element_of_group.NoneElement()
+        for iType in element.Element.__subclasses__():
+            if iType != element.NoneElement: 
+                cayleyTable[iType] = element.NoneElement()
         self.__cayleyTable = cayleyTable
 
         # Update Cayley table with provided elements
@@ -41,6 +41,15 @@ class Group:
         # Set the share entity
         self.shareEntity = shareCode
 
+    def __str__(self):
+        selfStr =  f'share:{self.shareCode}'
+        for subclass in element.Element.__subclasses__(): 
+            if self.containElementData(subclass):
+                selfStr += f"""\n{subclass} have {len(self.getElement(subclass).inDict)} Data"""
+            else: 
+                selfStr+=f"""\n{subclass} is empty"""
+        return selfStr
+        
     @property
     def shareEntity(self) -> ShareEntity:
         return self.__shareEntity
@@ -57,19 +66,19 @@ class Group:
     def shareCode(self, share):
         self.__shareEntity = ShareEntity.createShareCode(share)
 
-    @property
-    def cayleyTable(self) -> dict[type[element_of_group.Element], element_of_group.Element]:
-        """
-        Get the Cayley table of the group.
+    # @property
+    # def cayleyTable(self) -> dict[type[element.Element], element.Element]:
+    #     """
+    #     Get the Cayley table of the group.
 
-        Returns:
-            dict: The Cayley table mapping element types to group elements.
-        """
-        return self.__cayleyTable
+    #     Returns:
+    #         dict: The Cayley table mapping element types to group elements.
+    #     """
+    #     return self.__cayleyTable
     
 
     @property
-    def valuedSubgroup(self) -> dict[type[element_of_group.Element], 'Group']:
+    def valuedSubgroup(self) -> dict[type[element.Element], 'Group']:
         """
         Get the valued subgroup of the group.
 
@@ -79,11 +88,20 @@ class Group:
         """
         valuedCayleyTable = dict()
         for iClass, iEle in self.__cayleyTable.items():
-            if not self.nullElementClass(iClass):
+            if self.containElementData(iClass):
                 valuedCayleyTable[iClass] = iEle
         return valuedCayleyTable
     
-
+    def setCayleyElement(self,ele): 
+        if not isinstance(ele,element.Element): 
+            raise TypeError(f"""{ele} is of type{type(ele)}
+                            but not {element.Element}""")
+        if isinstance(ele,element.NoneElement): 
+            print(f"""Warning class {type(ele)} to None
+                  in cayleyElement of {self.shareCode}""")
+            return None
+        
+        self.__cayleyTable[type(ele)] = ele
 
     def updateCayleyTableWithGroupElements(self, *args):
         """
@@ -92,171 +110,104 @@ class Group:
         Args:
             *args: Elements to add to the Cayley table.
         """
-        unseenClasses = []
+        
         for iArg in args:
-            if isinstance(iArg, element_of_group.Element):
-                unseenClasses.append(type(iArg))
-                self.__cayleyTable[type(iArg)] = iArg
-                resultClasses = iArg.getConveribleClasses()
-                if resultClasses:
-                    for resultClass in resultClasses:
-                        if not self.nullElementClass(resultClass):
-                            self.__cayleyTable[resultClass] = iArg.convertTo(resultClass)
-                            unseenClasses.append(resultClass)
-
-        allCombination = self.__getAllCrossSignature(unseenClasses)
-        seenCombination = list()
-
-        while allCombination:
-            iCombination = allCombination.pop()
-            if iCombination not in seenCombination:
-                eleclassA = iCombination.pop()
-                eleclassB = iCombination.pop()
-                dotProduct = self.__dot(eleclassA, eleclassB)
-                seenCombination.append(set([eleclassA, eleclassB]))
-                if not isinstance(dotProduct, element_of_group.NoneElement):
-                    allCombination.extend(
-                        self.__getAllCrossSignature([type(dotProduct)]))
-                    self.__cayleyTable[type(dotProduct)] = dotProduct
-
-    def __getAllCrossSignature(
-        self,
-        unseenClasses: list[type[element_of_group.Element]]
-    ) -> list[set[element_of_group.Element]]:
-
-        allCombination = []
-        for iC in self.valuedSubgroup:
-            for jC in unseenClasses:
-                if (iC != jC
-                        and set([jC, iC]) not in allCombination):
-                    allCombination.append(set([iC, jC]))
-        return allCombination
+            self.setCayleyElement(iArg)
 
 
-    def __dot(
-        self,
-        classA: type[element_of_group.Element],
-        classB: type[element_of_group.Element]
-    ) -> element_of_group.Element:
-        if not (issubclass(classA, element_of_group.Element)
-                and issubclass(classB, element_of_group.Element)):
-            raise TypeError(f"""{classA} and {classB} should be 
-                            of a class whose parent class is 
-                            {element_of_group.Element}""")
-
-        for subClass in group_operators.CollectionOperator.__subclasses__():
-            if (subClass.match(classA, classB)
-                    and not self.containElementClass(
-                        subClass.productClass)
-                    ):
-                targetEle = subClass.dot(
-                    self.getElement(classA),
-                    self.getElement(classB))
-
-                return targetEle
-        return element_of_group.NoneElement()
-
-
-    def expandGroup(self, elementClass: type[element_of_group.Element]):
-        """
-        Expand the group by adding a new element class.
-
-        Args:
-            elementClass (type): The element class to add.
-
-        Raises:
-            TypeError: If the provided class is not a subclass of Element.
-
-        Returns:
-            bool: True if the group was successfully expanded, False otherwise.
-        """
-        if not isinstance(elementClass, type[element_of_group.Element]):
-            raise TypeError(f"{elementClass} is not of type{type[element_of_group.Element]}")
-
-        self.__cayleyTable[elementClass] = element_of_group.NoneElement()
-
-        for valuedElement in self.valuedSubgroup:
-            if valuedElement.convertible(elementClass):
-                converted = valuedElement.convertTo(elementClass)
-                self.updateCayleyTableWithGroupElements(converted)
-                return True
-
-        targetOperator = (group_operators.CollectionOperator.
-                          getOperator(elementClass))
-        if targetOperator is not None:
-            for iSig in targetOperator.signatures():
-                if iSig.issubset(set(self.valuedSubgroup)):
-                    operantClassA = iSig.pop()
-                    operantClassB = iSig.pop()
-                    product = targetOperator.dot(
-                        self.getElement(operantClassA),
-                        self.getElement(operantClassB))
-                    self.updateCayleyTableWithGroupElements(product)
-                    return True
-
-        return False
-
-    def containElementClass(
-        self,
-        eleClass: Type[element_of_group.Element]
-    ) -> bool:
-        """
-        Check if the group contains an element of the specified class.
-
-        Args:
-            eleClass (Type): The element class to check.
-
-        Returns:
-            bool: True if the group contains the element, False otherwise.
-        """
-        return eleClass in self.__cayleyTable
 
     def getElement(
         self,
-        eleClass: Type[element_of_group.Element]
-    ) -> element_of_group.Element:
+        eleClass: Type[element.Element]
+    ) -> element.Element:
         """
-        Get the element of the specified class from the group.
+        Retrieve an element of the specified class from the Cayley table.
 
         Args:
-            eleClass (Type): The element class to retrieve.
+            eleClass (Type[element.Element]): The class of the element to retrieve.
 
         Returns:
-            Element: The element of the specified class.
+            element.Element: The retrieved element.
 
         Raises:
-            ValueError: If the element class is not found in the group.
+            TypeError: If the provided class is not a subclass of element.Element.
+            ValueError: If the element class cannot be resolved for the group.
         """
-        if eleClass in self.__cayleyTable:
+        if not issubclass(eleClass, element.Element):
+            raise TypeError(f"{eleClass} is not a subclass of {element.Element}")
+
+        # Check if the element exists in the valued subgroup
+        if eleClass in self.valuedSubgroup:
             return self.__cayleyTable[eleClass]
-        else:
-            raise ValueError(f"""The element Class {eleClass}
-                             doesn't belong to the group""")
-            
+
+        # Attempt to find convertible classes
+        convertibleClasses = element.Element.getClassThatCanConvertedTo(eleClass)
+        if convertibleClasses:
+            for conClass in convertibleClasses:
+                if self.containElementData(conClass):
+                    self.__cayleyTable:dict[Type[element.Element],element.Element]
+                    resultElement = self.__cayleyTable.get(conClass).convertTo(eleClass)
+                    self.setCayleyElement(resultElement)
+                    return resultElement
+
+        # Attempt to resolve using an operator
+        targetOperator = operator.Operator.getOperatorforTargetClass(eleClass)
+        if targetOperator:
+            for signature in targetOperator.getSignatures():
+                if all(sig in self.valuedSubgroup for sig in signature):
+                    operands = [self.__cayleyTable[sig] for sig in signature]
+                    resultElement = targetOperator.dot(*operands)
+                    self.setCayleyElement(resultElement)
+                    print(f"Type: {type(resultElement)}")
+                    return resultElement
+
+        # If no resolution is possible, return NoneElement
+        print(f"Warning: Unable to resolve element of class {eleClass} for group {self}")
+        return element.NoneElement()
+    
+
+
+                
     def getDataPoins(
         self,
-        eleClass: Type[element_of_group.Element]
-    ) -> list[element_of_group.DataPoint]: 
+        eleClass: Type[element.Element]
+    ) -> list[element.DataPoint]:      
+        
         ele = self.getElement(eleClass)
         dataPoints = []
         for iPoint in ele.inDict.values():
-            dataPoints.append(dataPoints)
+            dataPoints.append(iPoint)
         return dataPoints
 
-    def nullElementClass(self, eleClass: Type[element_of_group.Element]) -> bool:
+
+    def inCayleyTable(self, eleClass: Type[element.Element]) -> bool:
         """
-        Check if the specified element class is a NoneElement.
+        Check if the given element class is registered in the Cayley table.
 
         Args:
-            eleClass (Type): The element class to check.
+            eleClass (Type[element.Element]): The element class to check.
 
         Returns:
-            bool: True if the element class is a NoneElement, False otherwise.
+            bool: True if the element class is in the Cayley table, False otherwise.
         """
-        return isinstance(
-            self.getElement(eleClass),
-            element_of_group.NoneElement
-        )
+        return eleClass in self.__cayleyTable
+            
+            
+    def containElementData(self, eleClass: Type[element.Element]) -> bool:
+        """
+        Check if the Cayley table has an element of the given class.
+
+        Args:
+            eleClass (Type[element.Element]): The element class to check.
+
+        Returns:
+            bool: True if the element exists, False otherwise.
+        """
+        if self.inCayleyTable(eleClass):
+            ele = self.__cayleyTable[eleClass]
+            return not isinstance(ele,element.NoneElement)
+
+        return False
 
 
     def joinGroupTable(self, groupB: Group):
@@ -275,12 +226,13 @@ class Group:
                             not {type(groupB)}""")
 
         elementsToBeUpdates = []
-        for key, value in groupB.cayleyTable.items():
-            if (key in self.cayleyTable
-                    and (not isinstance(value, element_of_group.NoneElement))
-                    and isinstance(self.getElement(key), element_of_group.NoneElement)):
+        for key, value in groupB.__cayleyTable.items():
+            if (key in self.__cayleyTable
+                    and (not isinstance(value, element.NoneElement))
+                    and isinstance(self.getElement(key), element.NoneElement)):
                 elementsToBeUpdates.append(value)
         self.updateCayleyTableWithGroupElements(*elementsToBeUpdates)
+        
     @classmethod
     def normalizeAllGroups(
         cls,
@@ -311,9 +263,7 @@ class Group:
             raise Exception()
 
         firstGroup = groups[0]
-        
-
-            
+                    
         
         commonValuedGroup = set(
             firstGroup.valuedSubgroup.keys()
@@ -340,16 +290,16 @@ class Group:
                     v for k, v in iEleInJGroup.items() if k in hashsIntersection
                 ]
                 goodElement = iClass(goodPoints)
-                jGroup.cayleyTable[iClass] = goodElement
+                jGroup.__cayleyTable[iClass] = goodElement
 
     @classmethod
     def operateElementwiseInAClassSpace(
         cls,
         groupA: Group,
         groupB: Group,
-        spaceOfClass: type[element_of_group.Element],
+        spaceOfClass: type[element.Element],
         pointwiseOperation: Callable
-    ) -> element_of_group.Element:
+    ) -> element.Element:
         """
         Perform an element-wise operation in a specific class space.
 
@@ -365,18 +315,24 @@ class Group:
         Raises:
             ValueError: If the required element class is not found in either group.
         """
-        if not groupA.containElementClass(spaceOfClass):
-            groupA.expandGroup(spaceOfClass)
+        
+        if not issubclass(spaceOfClass,element.Element):
+            print(f"""Waring: {spaceOfClass} 
+                  is not a subclass of {element.Element}""")
+            return element.NoneElement
+        
+        if not groupA.containElementData(spaceOfClass):
+            groupA.__cayleyTable[spaceOfClass]= element.NoneElement()
 
-        if not groupB.containElementClass(spaceOfClass):
-            groupB.expandGroup(spaceOfClass)
+        if not groupB.containElementData(spaceOfClass):
+            groupB.__cayleyTable[spaceOfClass] = element.NoneElement()
 
         spaceElementA = groupA.getElement(spaceOfClass)
         spaceElementB = groupB.getElement(spaceOfClass)
-        if isinstance(spaceElementA, element_of_group.NoneElement):
+        if isinstance(spaceElementA, element.NoneElement):
             raise ValueError(f"""{groupA} doesn't have point class 
                             {spaceOfClass} data""")
-        elif isinstance(spaceElementB, element_of_group.NoneElement):
+        elif isinstance(spaceElementB, element.NoneElement):
             raise ValueError(f"""{groupB} doesn't have point class 
                             {spaceOfClass} data""")
 

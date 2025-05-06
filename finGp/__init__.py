@@ -1,8 +1,8 @@
 
 
-from . import group_operators
-from .import group_creator 
-from . import element_of_group 
+from . import operator
+from .import creator 
+from . import element 
 from .group import Group
 from . import group_vistor
 
@@ -11,7 +11,7 @@ from .shareEntity import ShareEntity
 
 
 
-__all__ = ["group_operators","group_creator","element_of_group","Group","group_vistor","date_utils","ShareEntity"]
+__all__ = ["operator","creator","element","Group","group_vistor","date_utils","ShareEntity"]
 
 
 

@@ -49,6 +49,7 @@ class DataPoint(ABC):
 
 class Element(ABC): 
     
+    
     @property
     @abstractmethod
     def pointType(self)->type[DataPoint]: 
@@ -108,6 +109,13 @@ class Element(ABC):
         """        
         pass 
         
-
-    
+    @classmethod
+    def getClassThatCanConvertedTo(
+        cls,
+        targetClass) -> list[type[Element]]:
+        classes = []
+        for subclass in cls.__subclasses__(): 
+            if subclass.convertible(targetClass):
+                classes.append(subclass)
+        return classes
     

@@ -1,7 +1,7 @@
 import csv
 
 from ...date_utils import DateRepresentation
-from ...element_of_group import NoneDataPoint, NewsDataPoint
+from ...element import NoneDataPoint, NewsDataPoint
 from ...group import Group
 from ...shareEntity import ShareEntity              
 

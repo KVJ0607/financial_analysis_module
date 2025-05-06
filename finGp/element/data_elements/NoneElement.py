@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 from ...date_utils import DateRepresentation
-from ...element_of_group.element import DataPoint,Element
+from ...element.element import DataPoint,Element
 
         
 class NoneDataPoint(DataPoint): 

@@ -1,13 +1,13 @@
 import json
 
 from ..vistor import Vistor
-from ... import element_of_group
+from ... import element
 
 class JsonStrVistor(Vistor):
     
     def visitCarNElement(
         self,
-        cEle:element_of_group.CarNElement)->str:
+        cEle:element.CarNElement)->str:
         eleList = []
         for iHash,iCar in cEle.inDict.items(): 
             if iCar.valid():
@@ -27,7 +27,7 @@ class JsonStrVistor(Vistor):
     
     def visitNewsElement(
         self,
-        nEle:element_of_group.NewsElement)->str:
+        nEle:element.NewsElement)->str:
         
         eleList = []
         for iHash,iNews in nEle.inDict.items():
@@ -44,13 +44,13 @@ class JsonStrVistor(Vistor):
     
     def visitNoneElement(
         self,
-        nEle:element_of_group.NoneElement)->str:
+        nEle:element.NoneElement)->str:
         return json.dumps({})
     
     
     def visitPricingElement(
         self,
-        pEle:element_of_group.PricingElement)->str:
+        pEle:element.PricingElement)->str:
         
         eleList = []
         for iHash,iPrice in pEle.inDict.items():
@@ -64,7 +64,7 @@ class JsonStrVistor(Vistor):
     
     def visitCarsNewsElement(
         self,
-        cN_ele:element_of_group.CarNewsElement)->str:
+        cN_ele:element.CarNewsElement)->str:
         
         eleList = []
         for iHash,iCar in cN_ele.inDict.items(): 

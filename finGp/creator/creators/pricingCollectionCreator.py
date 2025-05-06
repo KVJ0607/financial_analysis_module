@@ -1,7 +1,7 @@
 import csv
 
 from ...date_utils import DateRepresentation
-from ...element_of_group import NoneDataPoint, PricingDataPoint
+from ...element import NoneDataPoint, PricingDataPoint
 from ...group import Group
 from ...shareEntity import ShareEntity
 
@@ -73,7 +73,6 @@ class PricingCollectionCreator:
 
                 if newDataPoint.valid():
                     collections.append(newDataPoint)
-
         shareEntity = ShareEntity.createShareCode(shareCode)
         return Group(shareEntity, PricingDataPoint.getGroupElement(collections))
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from abc import ABC,abstractmethod
 
@@ -9,34 +11,17 @@ class ShareEntity(ABC):
     It provide ways to create and report error of share code, store its region information
     '''    
 
-    class MarketRegion:     
-        def __init__(self,name): 
-            self.name = name
-        
-        def __str__(self): 
-            return str(self.name)
-        
-        def getRegionName(self):
-            return self.name
-    
-    class NoneRegion(MarketRegion): 
-        def __init__(self): 
-            self.__NoneRegion = True 
-            
-        def __str__(self): 
-            return ''
-        
-        def getRegionName(self):
-            return ''        
+    def __str__(self): 
+        return self.shareCode 
         
     @property
     @abstractmethod
-    def isolatedNumericalCode(self)->str:
+    def numericalCode(self)->str:
         pass 
     
     @property
     @abstractmethod
-    def isolatedMarketCode(self)->str: 
+    def marketCode(self)->str: 
         pass 
     
     @property
@@ -78,7 +63,26 @@ class ShareEntity(ABC):
     @abstractmethod
     def validifyCode(cls,inputStr)->str: 
         pass 
-                             
+
+class MarketRegion:     
+    def __init__(self,name): 
+        self.name = name
+    
+    def __str__(self): 
+        return str(self.name)
+    
+    def getRegionName(self):
+        return self.name
+
+class NoneRegion(MarketRegion): 
+    def __init__(self): 
+        self.__NoneRegion = True 
+        
+    def __str__(self): 
+        return ''
+    
+    def getRegionName(self):
+        return ''                                     
 
 class NoneEntity(ShareEntity):
     '''
@@ -90,11 +94,11 @@ class NoneEntity(ShareEntity):
         self.__code = ''
     
     @property
-    def isolatedNumericalCode(self)->str:
+    def numericalCode(self)->str:
         return '' 
     
     @property
-    def isolatedMarketCode(self)->str: 
+    def marketCode(self)->str: 
         return '' 
     
     @property
@@ -102,8 +106,8 @@ class NoneEntity(ShareEntity):
         return ''    
     
     @property    
-    def region(self)->ShareEntity.NoneRegion:
-        return ShareEntity.NoneRegion() 
+    def region(self)->NoneRegion:
+        return NoneRegion() 
 
     
     @classmethod
@@ -134,24 +138,40 @@ class H_ShareEntity(ShareEntity):
         '''           
         def createNumericalCode(hCode:str):   
             hCode = hCode.strip()      
-            if H_ShareEntity.validableCode():
+            if H_ShareEntity.validableCode(hCode):
                 hCode = H_ShareEntity.validifyCode(hCode)
                 return hCode.split('.')[0]
             else: 
                 raise Exception("This is not a valid H-share market Code: "+hCode)     
         
         def createMarketCode(hCode:str): 
-            if H_ShareEntity.validableCode(): 
-                return '.'+hCode.split('.')[1].upper()
+            if H_ShareEntity.validableCode(hCode): 
+                return '.'+hCode.split('.')[1]
             else: 
                 raise Exception("This is not a valid H-share market Code: "+hCode)    
                      
-        self.isolatedNumericalCode=createNumericalCode(hCode)
-        self.isolatedMarketCode=createMarketCode(hCode)
-        self.shareCode = self.isolatedNumericalCode +'.'+self.isolatedMarketCode
-        self.region = super().MarketRegion('Hong Kong')          
+        self.__isolatedNumericalCode=createNumericalCode(hCode)
+        self.__isolatedMarketCode=createMarketCode(hCode)
+        self.__shareCode = self.__isolatedNumericalCode +'.'+self.__isolatedMarketCode
+        self.__region = MarketRegion('Hong Kong')          
     
+
+    @property
+    def marketCode(self)->str: 
+        return self.__isolatedMarketCode
+
+    @property
+    def numericalCode(self)->str: 
+        return self.__isolatedNumericalCode
     
+        
+    @property
+    def shareCode(self)->str:
+        return self.__shareCode  
+    
+    @property
+    def region(self)->MarketRegion:
+        return  self.__region    
                         
     @classmethod
     def validableCode(cls,inputStr:str)->bool:
@@ -173,9 +193,9 @@ class H_ShareEntity(ShareEntity):
         patternOne = r'^\d{5}\.(hk|HK)$'
         patternTwo = r'^\d{4}\.(hk|HK)$'        
         if re.match(patternOne, inputStr):
-            return inputStr
+            return inputStr.upper()
         elif re.match(patternTwo,inputStr):
-            return '0'+inputStr
+            return '0'+inputStr.upper()
         else: 
             raise Exception('This code is not valid: '+inputStr)
             
@@ -195,29 +215,45 @@ class A_ShareEntity(ShareEntity):
             else: 
                 raise Exception("This is not a valid A-share market Code: "+aCode)             
         def createMarketCode(aCode:str): 
-            if A_ShareEntity.validableCode(): 
+            if A_ShareEntity.validableCode(aCode): 
                 aCode = A_ShareEntity.validifyCode(aCode) 
-                return '.'+aCode.split('.')[1].upper()
+                return '.'+aCode.split('.')[1]
             else: 
                 raise Exception("This is not a valid A-share market Code: "+aCode)  
                     
-        self.isolatedNumericalCode=createNumericalCode(aCode)
-        self.isolatedMarketCode=createMarketCode(aCode)      
-        self.shareCode = self.isolatedNumericalCode +'.'+self.isolatedMarketCode 
-        self.region = super().MarketRegion('China')  
+        self.__numericalCode=createNumericalCode(aCode)
+        self.__marketCode=createMarketCode(aCode)      
+        self.__shareCode = self.__numericalCode +'.'+self.__marketCode 
+        self.__region = MarketRegion('China')  
         
+    @property
+    def marketCode(self)->str: 
+        return self.__marketCode
+
+    @property
+    def numericalCode(self)->str: 
+        return self.__numericalCode
     
+        
+    @property
+    def shareCode(self)->str:
+        return self.__shareCode  
+    
+    @property
+    def region(self)->MarketRegion:
+        return  self.__region      
+
 
     @staticmethod
-    def validableCode(input_str:str)->bool:
+    def validableCode(inputStr:str)->bool:
         '''
         Check if it is valid or can be added a single prefix '0' to be it valid
         e.g. 688347.SS valid, 88347.SS can be transformed to 088347.SS
         '''      
-        inputStr = inputStr.strip()
-        patternOne = r'^\d{6}\.(ss|SS|sz|SZ)$'
-        patternTwo = r'^\d{5}\.(ss|SS|sz|SZ)$'
-        if re.match(patternOne, input_str) or re.match(patternTwo, input_str):
+        inputStr = inputStr.strip("")
+        patternOne = r'^\d{6}\.(ss|SS|sz|SZ|sh|SH)$'
+        patternTwo = r'^\d{5}\.(ss|SS|sz|SZ|sh|SH)$'
+        if re.match(patternOne, inputStr) or re.match(patternTwo, inputStr):
             return True
         else:
             return False      
@@ -225,12 +261,12 @@ class A_ShareEntity(ShareEntity):
     @staticmethod    
     def validifyCode(inputStr:str)->str: 
         inputStr = inputStr.strip()
-        patternOne = r'^\d{6}\.(ss|SS|sz|SZ)$'
-        patternTwo = r'^\d{5}\.(ss|SS|sz|SZ)$'       
+        patternOne = r'^\d{6}\.(ss|SS|sz|SZ|sh|SH)$'
+        patternTwo = r'^\d{5}\.(ss|SS|sz|SZ|sh|SH)$'       
         if re.match(patternOne, inputStr):
-            return inputStr
+            return inputStr.upper()
         elif re.match(patternTwo,inputStr):
-            return '0'+inputStr
+            return '0'+inputStr.upper()
         else: 
             raise Exception('This code is not valid: '+inputStr)
 
@@ -241,17 +277,17 @@ class JoinedShareEntity(ShareEntity):
         self.joinedEntities = joinedEntities
          
     @property    
-    def isolatedNumericalCode(self)->list[str]:
+    def numericalCode(self)->list[str]:
         isoCodes = []
         for entity in self.joinedEntities: 
-            isoCodes.append(entity.isolatedNumericalCode)
+            isoCodes.append(entity.numericalCode)
         return isoCodes
     
     @property
-    def isolatedMarketCode(self)->list[str]: 
+    def marketCode(self)->list[str]: 
         isoCodes = []
         for entity in self.joinedEntities: 
-            isoCodes.append(entity.isolatedMarketCode)
+            isoCodes.append(entity.marketCode)
         return isoCodes         
     
     @property
@@ -262,7 +298,7 @@ class JoinedShareEntity(ShareEntity):
         return isoCodes      
     
     @property
-    def region(self)->list[ShareEntity.MarketRegion]:
+    def region(self)->list[MarketRegion]:
         regions = []
         for entity in self.joinedEntities: 
             regions.append(entity.region)

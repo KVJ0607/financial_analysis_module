@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 
-from ..operator import CollectionOperator
-from ...element_of_group import Element,CarNElement,NewsElement,PricingElement,CarNewsElement,CarNewsDataPoint
+from ..operator import Operator
+from ...element import Element,CarNElement,NewsElement,PricingElement,CarNewsElement,CarNewsDataPoint
 from ...date_utils import DateRepresentation
 
-class CarNewsOperator(CollectionOperator): 
+class CarNewsOperator(Operator): 
 
     @property
     def productClass(self)->type[Element]:
@@ -18,7 +18,7 @@ class CarNewsOperator(CollectionOperator):
         classA:type[Element],
         classB:type[Element])->bool:
         eSignature = set([classA,classB])
-        for iSignature in cls.signatures(): 
+        for iSignature in cls.getSignatures(): 
             if iSignature == eSignature: 
                 return True
         return False
@@ -31,7 +31,7 @@ class CarNewsOperator(CollectionOperator):
         gEleB:Element,
         )->Element: 
         eSignature = set([type(gEleA),type(gEleB)])    
-        for iSignature in cls.signatures():
+        for iSignature in cls.getSignatures():
             if iSignature == eSignature: 
                 if eSignature == set([CarNElement,NewsElement]):
                     return cls.__defaultOperator(gEleA,gEleB)  
@@ -42,7 +42,7 @@ class CarNewsOperator(CollectionOperator):
         
     
     @classmethod
-    def signatures(cls)->list[set]: 
+    def getSignatures(cls)->list[set]: 
         signatures = []
         signatures.append(set([CarNElement,NewsElement]))
         signatures.append(set([PricingElement,NewsElement]))

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+ 
 
 
 
 
-
-class CollectionOperator(ABC) :     
+class Operator(ABC) :     
     """ 
     Handle binary opertaion between object of DataCollection with the 
     different pointType attribute.The actual logic depends on the pointType attribute 
@@ -50,7 +50,7 @@ class CollectionOperator(ABC) :
     
     @classmethod
     @abstractmethod
-    def signatures(cls)->list[set]: 
+    def getSignatures(cls)->list[set]: 
         """Return a list of set which act as a signature.
         Each signature is a set of two type[Element] which
         can be the operant.
@@ -58,9 +58,10 @@ class CollectionOperator(ABC) :
         pass 
     
     @classmethod 
-    def getOperator(
+    def getOperatorforTargetClass(
         cls,
-        targetClass)->type[CollectionOperator]:
+        targetClass)->type[Operator]:
         for subclass in cls.__subclasses__():
             if targetClass == subclass.productClass:
                 return subclass
+        return None

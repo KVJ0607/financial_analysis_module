@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ...date_utils import DateRepresentation
-from ...element_of_group.element import DataPoint,Element
+from ...element.element import DataPoint,Element
 
 class CarNDataPoint(DataPoint):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
@@ -9,14 +9,18 @@ class CarNDataPoint(DataPoint):
         self.__date = DateRepresentation(date)
         self.__previousDate = DateRepresentation(previousDate)
         self.__followingDate = DateRepresentation(followingDate)
-        self.__cumulativeAbnormalReturn = cumulativeAbnormalReturn
+        try:
+            self.__cumulativeAbnormalReturn = float(cumulativeAbnormalReturn)
+        except: 
+            self.__cumulativeAbnormalReturn = None 
         self.__intervalN = intervalN
+
 
     def __hash__(self): 
         hashStr = ("13" 
                     +str(self.previousDate).replace('-','')
                     +str(self.followingDate).replace('-','')
-                    +self.intervalN)
+                    +str(self.__intervalN))
         return int(hashStr)
         
     @property
@@ -45,19 +49,19 @@ class CarNDataPoint(DataPoint):
          
         
     def valid(self)->bool:  
+        
         validA = DateRepresentation.isValid(self.__date)
         validB = DateRepresentation.isValid(self.__previousDate)
         validC = DateRepresentation.isValid(self.__followingDate)
-        validD = isinstance(self.__cumulativeAbnormalReturn,(int,float))
+        validD = self.__cumulativeAbnormalReturn is not None and isinstance(self.__cumulativeAbnormalReturn, (int, float))
         validE = (isinstance(self.__intervalN,int) 
                     and self.__intervalN > 2 
-                    and self.__intervalN//2 == 1)
-        
+                    and self.__intervalN % 2 == 1)
         if validA and validB and validC and validD and validE:
             return  True
         else:
             return False
-    
+
     
 
 
@@ -80,16 +84,19 @@ class CarNElement(Element):
     
     @property
     def inDict(self)->dict[int,CarNDataPoint]:
-        return self.__element
+        return self.__inDict
     
     @inDict.setter
     def inDict(self,val:list[CarNDataPoint]): 
         validPoints = dict()
+        count = 0
         for iPoint in val: 
+            
             if isinstance(iPoint,CarNDataPoint):
-                if iPoint.valid():
-                    validPoints[iPoint.__hash__()]=(validPoints)
-        self.__element = validPoints
+                count +=1                  
+                if iPoint.valid():              
+                    validPoints[iPoint.__hash__()] = iPoint
+        self.__inDict = validPoints
 
     
     def acceptVistor(self,v):

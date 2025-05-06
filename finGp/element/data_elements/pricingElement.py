@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Iterator
+
 from ...date_utils import DateRepresentation
 from ..element import DataPoint,Element
 from .carNElement import CarNDataPoint,CarNElement
@@ -22,16 +24,15 @@ class PricingDataPoint(DataPoint):
     def __hash__(self): 
         hashStr = ("12"+str(self.date).replace('-',''))
         return int(hashStr)
-
-        
+ 
 
     @property
     def date(self)->DateRepresentation:
         return self.__date
     
     @date.setter
-    def date(self,val):
-        self.__date = DateRepresentation(val)
+    def date(self, val):
+        self.__date = DateRepresentation(val) if val else None
 
     @property
     def correspondingGroupElement(self)->type[Element]:
@@ -82,17 +83,15 @@ class PricingElement(Element):
         for iPoint in val: 
             if isinstance(iPoint,PricingDataPoint):
                 if iPoint.valid():
-                    validPoints[iPoint.__hash__()]=(iPoint)
+                    validPoints[iPoint.__hash__()]= iPoint
         self.__element = validPoints                     
 
     
+    
     @property
-    def dates(self)->list[DateRepresentation]:
-        thisDates = []
-        for iEle in self.inDict.values(): 
-            thisDates.append(iEle.date)
-        return thisDates
-
+    def dates(self) -> Iterator[DateRepresentation]:
+        return (iEle.date for iEle in self.inDict.values())
+    
 
     def acceptVistor(self,v):
         return v.visitPricingElement(self)    
@@ -122,23 +121,28 @@ class PricingElement(Element):
             raise ValueError("nDay should be an odd number")
         if nDay < 1: 
             raise ValueError("nDay should be a positive number")
-        nDay = (nDay-1)/2             
+        deltaDay = (nDay - 1) // 2  # Ensure nDay is an integer
         
         dateList = sorted(self.dates)
-        
+        datesSet = set(dateList)  
         carNPoints:list = [] 
-        for iDay in DateRepresentation.getDateRange(dateList[1],dateList[-1]):
-            if iDay+nDay in dateList and iDay-nDay in dateList:
-                lastPoint:PricingDataPoint = self.getPointFrom(iDay-nDay)
-                nextPoint:PricingDataPoint = self.getPointFrom(iDay+nDay)
+        
+        for iDay in DateRepresentation.getDateRange(dateList[1], dateList[-1]):
+            
+            nextDay = iDay + deltaDay
+            lastDay = iDay - deltaDay
+            if nextDay in datesSet and lastDay in datesSet:
+                nextPoint:PricingDataPoint = self.getPointFrom(nextDay)
+                lastPoint:PricingDataPoint = self.getPointFrom(lastDay)
                 if lastPoint.valid() and nextPoint.valid():
                     carNPoints.append(CarNDataPoint(
                         iDay,
-                        iDay-nDay,
-                        iDay+nDay,
-                        (nextPoint.adjClose-lastPoint.adjClose)/lastPoint.adjClose,
+                        lastDay,
+                        nextDay,
+                        (nextPoint.adjClose - lastPoint.adjClose) / lastPoint.adjClose,
                         nDay)
                     )
+        print("Number of points: ", len(carNPoints))
         return CarNElement(carNPoints)
 
     
