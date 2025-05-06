@@ -61,7 +61,13 @@ class Element(ABC):
         """set containing valid DataPoint. Return an empty
         dict if there is no valid DataPoint"""
         pass 
-
+    
+    @property
+    def hashSet(self)->set[str]: 
+        hSet = set()
+        for iHash,iPoint in self.inDict.items():
+            hSet.add(iHash)
+        return hSet 
 
     @abstractmethod
     def acceptVistor(

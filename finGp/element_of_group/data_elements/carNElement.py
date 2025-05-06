@@ -91,7 +91,6 @@ class CarNElement(Element):
                     validPoints[iPoint.__hash__()]=(validPoints)
         self.__element = validPoints
 
-
     
     def acceptVistor(self,v):
         return v.visitCarNElement(self)            

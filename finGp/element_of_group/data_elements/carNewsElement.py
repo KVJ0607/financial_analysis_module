@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from ...date_utils import DateRepresentation
-from ...element_of_group import DataPoint,Element,CarNDataPoint,NoneDataPoint
+from .. import DataPoint,Element,CarNDataPoint,NoneDataPoint
 
     
-class CarsNewsDataPoint(DataPoint):
+class CarNewsDataPoint(DataPoint):
     def __init__(self,carN,accumlatedSentimentalScore:float):
         if isinstance(carN,CarNDataPoint):
             self.carN = carN
@@ -29,29 +29,29 @@ class CarsNewsDataPoint(DataPoint):
     @classmethod
     def getGroupElement(
         cls,
-        points:list[CarsNewsDataPoint])->CarsNewsElement: 
-        return  CarsNewsElement(points)
+        points:list[CarNewsDataPoint])->CarNewsElement: 
+        return  CarNewsElement(points)
 
 
     
-class CarsNewsElement(Element):
+class CarNewsElement(Element):
     
-    def __init__(self,points:list[CarsNewsDataPoint]):
+    def __init__(self,points:list[CarNewsDataPoint]):
         self.inDict = points 
         
     @property
     def pointType(self)->type[DataPoint]: 
-        return CarsNewsDataPoint
+        return CarNewsDataPoint
     
     @property
-    def inDict(self)->dict[str,CarsNewsDataPoint]:
+    def inDict(self)->dict[str,CarNewsDataPoint]:
         return self.__element
     
     @inDict.setter
-    def inDict(self,val:list[CarsNewsDataPoint]): 
+    def inDict(self,val:list[CarNewsDataPoint]): 
         validPoints = dict()
         for iPoint in val: 
-            if iPoint.valid() and isinstance(iPoint,CarsNewsDataPoint):
+            if iPoint.valid() and isinstance(iPoint,CarNewsDataPoint):
                 validPoints[iPoint.__hash__()] = iPoint
         self.__element = validPoints            
 

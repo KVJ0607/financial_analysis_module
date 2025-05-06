@@ -3,14 +3,14 @@ from __future__ import annotations
 
 
 from ..operator import CollectionOperator
-from ...element_of_group import Element,CarNElement,NewsElement,PricingElement,CarsNewsElement,CarsNewsDataPoint
+from ...element_of_group import Element,CarNElement,NewsElement,PricingElement,CarNewsElement,CarNewsDataPoint
 from ...date_utils import DateRepresentation
 
 class CarNewsOperator(CollectionOperator): 
 
     @property
     def productClass(self)->type[Element]:
-        return CarsNewsElement         
+        return CarNewsElement         
 
     @classmethod
     def match(
@@ -84,7 +84,7 @@ class CarNewsOperator(CollectionOperator):
                     iDataPoint = newsEle.getPointFrom(iTime)
                     accumlatedSentimentalScore += iDataPoint.sentimentalScore
                 carNewsDataPoints.append(
-                    CarsNewsDataPoint(
+                    CarNewsDataPoint(
                         carPoint,
                         accumlatedSentimentalScore)
                 )                        
@@ -92,7 +92,7 @@ class CarNewsOperator(CollectionOperator):
             print(F"Error: {type(gEleA)} and {type(gEleB)}")
             raise e
                 
-        return CarsNewsDataPoint.getGroupElement(carNewsDataPoints)
+        return CarNewsDataPoint.getGroupElement(carNewsDataPoints)
         
     
     @classmethod

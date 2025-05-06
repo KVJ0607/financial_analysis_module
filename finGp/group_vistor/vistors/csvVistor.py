@@ -59,7 +59,7 @@ class CsvVistor(Vistor):
 
     def visitCarsNewsElement(
         self,
-        cN_ele: element_of_group.CarsNewsElement)->list[list[str]]:
+        cN_ele: element_of_group.CarNewsElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN", "SentimentalScore"]]
         for iHash, iCar in cN_ele.inDict.items():

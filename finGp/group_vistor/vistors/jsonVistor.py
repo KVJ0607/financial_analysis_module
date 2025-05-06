@@ -64,7 +64,7 @@ class JsonStrVistor(Vistor):
     
     def visitCarsNewsElement(
         self,
-        cN_ele:element_of_group.CarsNewsElement)->str:
+        cN_ele:element_of_group.CarNewsElement)->str:
         
         eleList = []
         for iHash,iCar in cN_ele.inDict.items(): 
