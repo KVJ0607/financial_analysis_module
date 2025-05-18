@@ -1,5 +1,5 @@
-from .vistor import Vistor
-from .vistors.jsonVistor import JsonStrVistor
-from .vistors.csvVistor import CsvVistor
+from .visitor import Visitor
+from .visitors.jsonVisitor import JsonStrVistor
+from .visitors.csvVisitor import CsvVistor
 
-__all__ = ["Vistor","JsonStrVistor","CsvVistor"]
+__all__ = ["Visitor","JsonStrVistor","CsvVistor"]

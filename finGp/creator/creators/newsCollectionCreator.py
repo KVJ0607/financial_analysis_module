@@ -59,7 +59,7 @@ class NewsCollectionCreator:
                 if newsDataPoint.valid():
                     collections.append(newsDataPoint)
                 
-        shareEntity = ShareEntity.createShareCode(shareCode)     
+        shareEntity = ShareEntity.createShareEntity(shareCode)     
         return Group(shareEntity, NewsDataPoint.getGroupElement(collections))
     
     @classmethod

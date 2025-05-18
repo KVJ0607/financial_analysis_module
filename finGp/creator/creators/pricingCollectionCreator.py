@@ -73,7 +73,7 @@ class PricingCollectionCreator:
 
                 if newDataPoint.valid():
                     collections.append(newDataPoint)
-        shareEntity = ShareEntity.createShareCode(shareCode)
+        shareEntity = ShareEntity.createShareEntity(shareCode)
         return Group(shareEntity, PricingDataPoint.getGroupElement(collections))
 
     @classmethod

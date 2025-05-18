@@ -36,7 +36,7 @@ class ShareEntity(ABC):
 
     
     @classmethod
-    def createShareCode(cls,shareCode) ->'ShareEntity': 
+    def createShareEntity(cls,shareCode) ->'ShareEntity': 
         if isinstance(shareCode,ShareEntity): 
             return shareCode
         for mSubclass in ShareEntity.__subclasses__(): 
@@ -50,7 +50,7 @@ class ShareEntity(ABC):
                 
         joinedEntities = []
         for i_code in shareCodes: 
-            joinedEntities.append(cls.createShareCode(i_code))
+            joinedEntities.append(cls.createShareEntity(i_code))
             
         return JoinedShareEntity(joinedEntities)
     
@@ -111,7 +111,7 @@ class NoneEntity(ShareEntity):
 
     
     @classmethod
-    def createShareCode(cls,shareCode) ->'ShareEntity': 
+    def createShareEntity(cls,shareCode) ->'ShareEntity': 
         return NoneEntity()
     
     

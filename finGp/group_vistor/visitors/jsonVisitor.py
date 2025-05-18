@@ -1,15 +1,15 @@
 import json
 
-from ..vistor import Vistor
+from ..visitor import Visitor
 from ... import element
 
-class JsonStrVistor(Vistor):
+class JsonStrVistor(Visitor):
     
     def visitCarNElement(
         self,
         cEle:element.CarNElement)->str:
         eleList = []
-        for iHash,iCar in cEle.items: 
+        for iHash,iCar in cEle.dataPoints: 
             if iCar.valid():
                 eleList.append({
                 'date':str(iCar.date),
@@ -30,7 +30,7 @@ class JsonStrVistor(Vistor):
         nEle:element.NewsElement)->str:
         
         eleList = []
-        for iHash,iNews in nEle.items:
+        for iHash,iNews in nEle.dataPoints:
             if iNews.valid():
                 eleList.append({
                     'date':str(iNews.date),
@@ -53,7 +53,7 @@ class JsonStrVistor(Vistor):
         pEle:element.PricingElement)->str:
         
         eleList = []
-        for iHash,iPrice in pEle.items:
+        for iHash,iPrice in pEle.dataPoints:
             if iPrice.valid():
                 eleList.append({
                     'date':str(iPrice.date),
@@ -67,7 +67,7 @@ class JsonStrVistor(Vistor):
         cN_ele:element.CarNewsElement)->str:
         
         eleList = []
-        for iHash,iCar in cN_ele.items: 
+        for iHash,iCar in cN_ele.dataPoints: 
             if iCar.valid():
                 eleList.append({
                 'date':str(iCar.date),

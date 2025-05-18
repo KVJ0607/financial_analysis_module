@@ -11,25 +11,8 @@ newsSentiment = finGp.creator.NewsCollectionCreator.getInstacnefromCsv("example_
 
 firstTractorA.joinGroupTable(newsSentiment)
 firstTractorH.joinGroupTable(newsSentiment)
-
-
-def carDiff(gPointA,gPointB):     
-    newPoint = copy.copy(gPointA)
-    cardiff = gPointA.cumulativeAbnormalReturn-gPointB.cumulativeAbnormalReturn
-    if cardiff < 0 : 
-        cardiff = cardiff*-1
-    newPoint.__cumulativeAbnormalReturn = cardiff
-    return newPoint
     
 
-comparisonGroup = finGp.Group(
-    firstTractorA.shareEntity,
-    finGp.Group.operateElementwiseInAClassSpace(
-        firstTractorA,
-        firstTractorH,
-        finGp.element.CarNElement,
-        carDiff)
-)
 
 finGp.Group.normalizeAllGroups(firstTractorA,firstTractorH)
 
@@ -43,12 +26,10 @@ finGp.Group.normalizeAllGroups(firstTractorA,firstTractorH)
 
 #Part 1: Normality test 
 
-##List of Car DataPoint 
-aCarPoints = firstTractorA.getElement(finGp.element.CarNElement(interval=3))
-hCarPoints = firstTractorH.getElement(finGp.element.CarNElement(interval=3))
-###List of cumulativeAbnormalReturn
-aCar = [x.cumulativeAbnormalReturn for x in aCarPoints]
-hCar = [x.cumulativeAbnormalReturn for x in hCarPoints]
+##List of Car
+aCar = firstTractorA.getElement(finGp.element.CarNElement(interval=3))
+hCar = firstTractorH.getElement(finGp.element.CarNElement(interval=3))
+
 
 
 
@@ -68,11 +49,6 @@ print("aCar pValue:",resACar.pvalue)
 resHCar = stats.normaltest(hCar)
 print("hCar pValue:",resHCar.pvalue)
 
-resACarWithNews = stats.normaltest(aCarWithNews)
-print("aCar with News pValue:",resACarWithNews.pvalue)
-
-resHCarWithNews = stats.normaltest(hCarWithNews)
-print("hCar with News pValue:",resHCarWithNews.pvalue)
 
 
 

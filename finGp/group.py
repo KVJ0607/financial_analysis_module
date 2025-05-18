@@ -18,19 +18,19 @@ class Group:
 
     def __init__(
         self,
-        shareCode: ShareEntity | str = None,
+        share: ShareEntity | str = None,
         *args,
     ):
         """
         Initialize a Group instance.
 
         Args:
-            shareCode (ShareEntity | str, optional): The share code or entity associated with the group.
+            share (ShareEntity | str, optional): The share code or entity associated with the group.
             *args: Elements to initialize the group with.
         """
         # Initialize Cayley table with NoneElement for all subclasses of Element
         cayleyTable = {}
-        for iType in element.Element.__subclasses__():
+        for iType in element.ElementBase.__subclasses__():
             if iType != element.NoneElement: 
                 cayleyTable[iType] = element.NoneElement()
         self.__cayleyTable = cayleyTable
@@ -39,13 +39,13 @@ class Group:
         self.updateCayleyTableWithGroupElements(*args)
 
         # Set the share entity
-        self.shareEntity = shareCode
+        self.shareEntity = share
 
     def __str__(self):
         selfStr =  f'share:{self.shareCode}'
-        for subclass in element.Element.__subclasses__(): 
+        for subclass in element.ElementBase.__subclasses__(): 
             if self.containElementData(subclass):
-                selfStr += f"""\n{subclass} have {len(self.getElement(subclass).items)} Data"""
+                selfStr += f"""\n{subclass} have {len(self.getElement(subclass).dataPoints)} Data"""
             else: 
                 selfStr+=f"""\n{subclass} is empty"""
         return selfStr
@@ -56,29 +56,17 @@ class Group:
 
     @shareEntity.setter
     def shareEntity(self, share):
-        self.__shareEntity = ShareEntity.createShareCode(share)
+        self.__shareEntity = ShareEntity.createShareEntity(share)
 
     @property
     def shareCode(self) -> str:
         return self.__shareEntity.shareCode
 
-    @shareCode.setter
-    def shareCode(self, share):
-        self.__shareEntity = ShareEntity.createShareCode(share)
 
-    # @property
-    # def cayleyTable(self) -> dict[type[element.Element], element.Element]:
-    #     """
-    #     Get the Cayley table of the group.
-
-    #     Returns:
-    #         dict: The Cayley table mapping element types to group elements.
-    #     """
-    #     return self.__cayleyTable
     
 
     @property
-    def valuedSubgroup(self) -> dict[type[element.Element], 'Group']:
+    def valuedSubgroup(self) -> dict[type[element.ElementBase], 'Group']:
         """
         Get the valued subgroup of the group.
 
@@ -93,9 +81,9 @@ class Group:
         return valuedCayleyTable
     
     def setCayleyElement(self,ele): 
-        if not isinstance(ele,element.Element): 
+        if not isinstance(ele,element.ElementBase): 
             raise TypeError(f"""{ele} is of type{type(ele)}
-                            but not {element.Element}""")
+                            but not {element.ElementBase}""")
         if isinstance(ele,element.NoneElement): 
             print(f"""Warning class {type(ele)} to None
                   in cayleyElement of {self.shareCode}""")
@@ -118,8 +106,8 @@ class Group:
 
     def getElement(
         self,
-        eleTemplate: element.Element|type[element.Element]
-    ) -> element.Element:
+        eleTemplate: element.ElementBase|type[element.ElementBase]
+    ) -> element.ElementBase:
         """
         Retrieve an element of the specified class from the Cayley table.
 
@@ -137,9 +125,9 @@ class Group:
         
 
         if isinstance(eleTemplate,type):
-            if issubclass(eleTemplate,element.Element):
+            if issubclass(eleTemplate,element.ElementBase):
                 eleClass = eleTemplate
-        elif isinstance(eleTemplate,element.Element): 
+        elif isinstance(eleTemplate,element.ElementBase): 
             eleClass = type(eleTemplate)
         else: 
             raise TypeError("")    
@@ -150,11 +138,11 @@ class Group:
             return self.__cayleyTable[eleClass]
 
         # Attempt to find convertible classes
-        convertibleClasses = element.Element.getClassThatCanConvertedTo(eleClass)
+        convertibleClasses = element.ConversionMixin.getClassThatCanConvertedTo(eleClass)
         if convertibleClasses:
             for conClass in convertibleClasses:
                 if self.containElementData(conClass):
-                    self.__cayleyTable:dict[Type[element.Element],element.Element]
+                    self.__cayleyTable:dict[Type[element.ElementBase],element.ElementBase]
                     resultElement = self.__cayleyTable.get(conClass).convertTo(eleTemplate)
                     self.setCayleyElement(resultElement)
                     return resultElement
@@ -179,7 +167,7 @@ class Group:
                 
 
 
-    def inCayleyTable(self, eleClass: Type[element.Element]) -> bool:
+    def inCayleyTable(self, eleClass: Type[element.ElementBase]) -> bool:
         """
         Check if the given element class is registered in the Cayley table.
 
@@ -192,7 +180,7 @@ class Group:
         return eleClass in self.__cayleyTable
             
             
-    def containElementData(self, eleClass: Type[element.Element]) -> bool:
+    def containElementData(self, eleClass: Type[element.ElementBase]) -> bool:
         """
         Check if the Cayley table has an element of the given class.
 
@@ -232,6 +220,7 @@ class Group:
                 elementsToBeUpdates.append(value)
         self.updateCayleyTableWithGroupElements(*elementsToBeUpdates)
         
+        
     @classmethod
     def normalizeAllGroups(
         cls,
@@ -254,7 +243,9 @@ class Group:
         for iGroup in groups[1:]:
             commonElement.intersection_update(iGroup.valuedSubgroup.keys())
         
-
+        # Filter commonElement to only include classes that implement SetOpsMixin
+        commonElement = {cls for cls in commonElement if issubclass(cls, element.SetOpsMixin)}
+        
         for iClass in commonElement:
             goodElements = iClass.intersectMany(*[x.getElement(iClass) for x in groups])
             

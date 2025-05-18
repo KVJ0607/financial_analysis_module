@@ -1,6 +1,6 @@
 from abc import ABC,abstractmethod
 
-class Vistor(ABC):
+class Visitor(ABC):
     
     @abstractmethod
     def visitCarNElement(self,cEle):

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from ...date_utils import DateRepresentation
-from ...element.element import DataPoint,Element
+from ..base import DataPointBase,ElementBase
+from ..setopsMixin import SetOpsMixin
+from ..visitorMixin import VisitorMixin
 
-class CarNDataPoint(DataPoint):     
+class CarNDataPoint(DataPointBase):     
     def __init__(self,date,previousDate,followingDate,cumulativeAbnormalReturn,intervalN): 
 
         self.__date = DateRepresentation(date)
@@ -28,7 +30,7 @@ class CarNDataPoint(DataPoint):
         return self.__date
 
     @property
-    def correspondingGroupElement(self)->type[Element]:
+    def correspondingGroupElement(self)->type[ElementBase]:
         return CarNElement        
                 
     @property
@@ -70,125 +72,60 @@ class CarNDataPoint(DataPoint):
         return CarNElement(points)
 
     @classmethod
-    def getTypeGroupElement(cls)->type[Element]:
+    def getTypeGroupElement(cls)->type[ElementBase]:
         return CarNElement 
 
+class CarNVisitor(VisitorMixin):
+        
+    def acceptVisitor(self,v):
+        return v.visitCarNElement(self.dataPoints)            
 
+    def acceptOutVisitor(
+        self,
+        v,
+        dest:str): 
+        return v.visitOutCarNElement(self.dataPoints,dest)    
             
-class CarNElement(Element):
-    def __init__(self,points:list[CarNDataPoint]=[],interval=3):
-        self.__inDict = points        
+class CarNElement(ElementBase,SetOpsMixin,CarNVisitor):
+            
+    def __init__(self,points:list[CarNDataPoint]=None,interval=3):    
+        if points is None:
+            points = [] 
+             
+        self._dataPoints = []
+        self.dataPoints = points   # This will validate and set self._items  
         self.interval = interval
 
-    @property
-    def pointType(self)->type[DataPoint]: 
-        return CarNDataPoint
-    
-    @property
-    def __inDict(self)->dict[int,CarNDataPoint]:
-        return self.__inDict
-    
-    @__inDict.setter
-    def __inDict(self,val:list[CarNDataPoint]): 
-        validPoints = dict()
-        count = 0
-        for iPoint in val: 
-            
-            if isinstance(iPoint,CarNDataPoint):
-                count +=1                  
-                if iPoint.valid():              
-                    validPoints[iPoint.__hash__()] = iPoint
-        self.__inDict = validPoints
 
     @property
-    def items(self):
-        """
-        Returns an iterable view of (key, DataPoint) pairs contained in this Element,
-        allowing iteration over all DataPoints.
-        """
-        return self.__inDict.items()
+    def dataPoints(self): 
+        return self._dataPoints
 
+    @dataPoints.setter
+    def dataPoints(self,points):
+        validPoints = []
+        for iPoint in points:
+            if isinstance(iPoint,CarNDataPoint) and iPoint.valid():                
+                validPoints.append(iPoint)
+        self._dataPoints = validPoints
+        
+    @property
+    def pointType(self): return CarNDataPoint
     
     @property
-    def interval(self)->int: 
-        return self.__interval    
+    def interval(self): return self.__interval    
     
     @interval.setter
     def interval(self,nDay:int): 
-        if nDay//2 == 0: 
+        if nDay%2 == 0: 
             raise ValueError("nDay should be an odd number")
         if nDay < 1: 
             raise ValueError("nDay should be a positive number")
         self.__interval = nDay 
 
-    
-    def acceptVistor(self,v):
-        return v.visitCarNElement(self)            
-
-    def acceptOutVistor(
-        self,
-        v,
-        dest:str): 
-        return v.visitOutCarNElement(self,dest)
             
-    @classmethod
-    def convertible(cls,targetClass:type[Element])->bool:
-        return False 
-    
-    
-    def convertTo(self,targetTemplate:Element | type[Element])->Element:
-        pass     
-    
-    @classmethod
-    def getConveribleClasses(cls)->list[type[Element]]:
-        return []
 
 
-    def intersect(self, other: 'Element') -> 'Element':
-        """
-        Return a new Element containing only the DataPoints that are present in both
-        this Element and the other Element, as determined by their identity or hash.
+  
 
-        Args:
-            other (Element): Another Element to intersect with.
-
-        Returns:
-            Element: A new Element instance with the intersection of DataPoints.
-        """
-        # Get the intersection of hash keys
-        common_hashes = set(self.__inDict.keys()) & set(other.__inDict.keys())
-        # Collect DataPoints from self that have these hashes
-        intersected_points = [self.__inDict[h] for h in common_hashes]
-        # Create a new Element of the same type with these points
-        return type(self)(intersected_points)    
-
-    @classmethod
-    def intersectMany(cls, *elements: 'Element') -> list['Element']:
-        """
-        Return a list of Elements, where each element is the intersection of that element
-        with all the others in the provided arguments.
-
-        Args:
-            *elements (Element): Two or more Element instances to intersect.
-
-        Returns:
-            list[Element]: A list of Element instances, each intersected with all others.
-
-        Raises:
-            ValueError: If fewer than two elements are provided.
-    """
-        if len(elements) < 2:
-            raise ValueError("At least two Element instances are required for intersection.")
-
-        result = []
-        for idx, elem in enumerate(elements):
-            # Intersect this element with all others
-            others = elements[:idx] + elements[idx+1:]
-            common_hashes = set(elem.__inDict.keys())
-            for other in others:
-                common_hashes &= set(other.__inDict.keys())
-            intersected_points = [elem.__inDict[h] for h in common_hashes]
-            result.append(type(elem)(intersected_points))
-        return result            
-    
     

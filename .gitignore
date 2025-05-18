@@ -4,3 +4,4 @@ test*
 *.dll
 *.so
 *.lib
+.gitatt*

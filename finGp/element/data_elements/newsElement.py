@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from ...date_utils import DateRepresentation
-from ..element import DataPoint,Element
-from .NoneElement import NoneDataPoint        
+from ..base import DataPointBase,ElementBase     
+from ..setopsMixin import SetOpsMixin
+from ..visitorMixin import VisitorMixin
 
-class NewsDataPoint(DataPoint): 
-    
+class NewsDataPoint(DataPointBase): 
     
     def __init__(self,date,siteAddress:str,sentimentalScore:int|str|float):   
         self.date = date 
@@ -26,7 +26,7 @@ class NewsDataPoint(DataPoint):
         self.__date = DateRepresentation(val)
 
     @property
-    def correspondingGroupElement(self)->type[Element]:
+    def correspondingGroupElement(self)->type[ElementBase]:
         return NewsElement        
             
     @property
@@ -50,112 +50,39 @@ class NewsDataPoint(DataPoint):
     def getGroupElement(cls, points:list[NewsDataPoint])->NewsElement:
         return NewsElement(points)
 
-    def getTypeGroupElement(cls)->type[Element]:
+    def getTypeGroupElement(cls)->type[ElementBase]:
         return NewsElement
     
-    
-
-class NewsElement(Element):
-    def __init__(self,points:list[NewsDataPoint]=[]):
-        self.__inDict = points        
-    
-    @property
-    def pointType(self)->type[DataPoint]: 
-        return NewsDataPoint
-    
-    @property
-    def __inDict(self)->dict[int,NewsDataPoint]:
-        return self.__element
-    
-    @__inDict.setter
-    def __inDict(self,val:list[NewsDataPoint]): 
-        validPoints = dict()
-        for iPoint in val: 
-            if isinstance(iPoint,NewsDataPoint):
-                if iPoint.valid():
-                    validPoints[iPoint.__hash__()]= iPoint
-        self.__element = validPoints
-
-    @property
-    def items(self):
-        """
-        Returns an iterable view of (key, DataPoint) pairs contained in this Element,
-        allowing iteration over all DataPoints.
-        """
-        return self.__inDict.items()
-        
-    
-    def acceptVistor(self,v):
+class NewsVisitor(VisitorMixin):
+    def acceptVisitor(self,v):
         return v.visitNewsElement(self)
     
-    def acceptOutVistor(
+    def acceptOutVisitor(
         self,
         v,
         dest:str): 
         return v.visitOutNewsElement(self,dest)
-
-                
-    @classmethod
-    def convertible(cls,targetClass:type[Element])->bool:
-        return False 
     
+class NewsElement(ElementBase,SetOpsMixin,NewsVisitor):
+    def __init__(self,points:list[NewsDataPoint]=[]):
+        self.dataPoints = points        
     
-    def convertTo(self,targetTemplate:Element | type[Element])->Element:
-        pass     
+    @property
+    def pointType(self): return NewsDataPoint
     
-    def getPointFrom(self,date:DateRepresentation)->NewsDataPoint: 
-        hashStr = ("14" 
-                    +str(date).replace('-',''))
-        return self.__inDict.get(int(hashStr),NoneDataPoint)
+    @property
+    def dataPoints(self)->dict[int,NewsDataPoint]:
+        return self._dataPoints
     
+    @dataPoints.setter
+    def dataPoints(self,val:list[NewsDataPoint]): 
+        validPoints = []
+        for iPoint in val: 
+            if isinstance(iPoint,NewsDataPoint) and iPoint.valid():
+                    validPoints.append(iPoint)
+        self._dataPoints = validPoints
+
+        
     
-    @classmethod
-    def getConveribleClasses(cls)->list[type[Element]]:
-        return []        
 
-    def intersect(self, other: 'Element') -> 'Element':
-        """
-        Return a new Element containing only the DataPoints that are present in both
-        this Element and the other Element, as determined by their identity or hash.
-
-        Args:
-            other (Element): Another Element to intersect with.
-
-        Returns:
-            Element: A new Element instance with the intersection of DataPoints.
-        """
-        # Get the intersection of hash keys
-        common_hashes = set(self.__inDict.keys()) & set(other.__inDict.keys())
-        # Collect DataPoints from self that have these hashes
-        intersected_points = [self.__inDict[h] for h in common_hashes]
-        # Create a new Element of the same type with these points
-        return type(self)(intersected_points)    
-
-    @classmethod
-    def intersectMany(cls, *elements: 'Element') -> list['Element']:
-        """
-        Return a list of Elements, where each element is the intersection of that element
-        with all the others in the provided arguments.
-
-        Args:
-            *elements (Element): Two or more Element instances to intersect.
-
-        Returns:
-            list[Element]: A list of Element instances, each intersected with all others.
-
-        Raises:
-            ValueError: If fewer than two elements are provided.
-        """
-        if len(elements) < 2:
-            raise ValueError("At least two Element instances are required for intersection.")
-
-        result = []
-        for idx, elem in enumerate(elements):
-            # Intersect this element with all others
-            others = elements[:idx] + elements[idx+1:]
-            common_hashes = set(elem.__inDict.keys())
-            for other in others:
-                common_hashes &= set(other.__inDict.keys())
-            intersected_points = [elem.__inDict[h] for h in common_hashes]
-            result.append(type(elem)(intersected_points))
-        return result
+    

@@ -3,20 +3,20 @@ from __future__ import annotations
 
 
 from ..operator import Operator
-from ...element import Element,CarNElement,NewsElement,PricingElement,CarNewsElement,CarNewsDataPoint
+from ...element import ElementBase,CarNElement,NewsElement,PricingElement,CarNewsElement,CarNewsDataPoint
 from ...date_utils import DateRepresentation
 
 class CarNewsOperator(Operator): 
 
     @property
-    def productClass(self)->type[Element]:
+    def productClass(self)->type[ElementBase]:
         return CarNewsElement         
 
     @classmethod
     def match(
         cls,
-        classA:type[Element],
-        classB:type[Element])->bool:
+        classA:type[ElementBase],
+        classB:type[ElementBase])->bool:
         eSignature = set([classA,classB])
         for iSignature in cls.getSignatures(): 
             if iSignature == eSignature: 
@@ -27,9 +27,9 @@ class CarNewsOperator(Operator):
     @classmethod
     def dot(
         cls,
-        gEleA:Element,
-        gEleB:Element,
-        )->Element: 
+        gEleA:ElementBase,
+        gEleB:ElementBase,
+        )->ElementBase: 
         eSignature = set([type(gEleA),type(gEleB)])    
         for iSignature in cls.getSignatures():
             if iSignature == eSignature: 
@@ -52,8 +52,8 @@ class CarNewsOperator(Operator):
     @classmethod
     def __defaultOperator(
         cls,
-        gEleA:Element,
-        gEleB:Element) -> Element:                        
+        gEleA:ElementBase,
+        gEleB:ElementBase) -> ElementBase:                        
         carEle:CarNElement = None 
         newsEle:NewsElement = None
                 
@@ -74,7 +74,7 @@ class CarNewsOperator(Operator):
         
         carNewsDataPoints = []
         try:
-            for carHash,carPoint in carEle.items:                 
+            for carHash,carPoint in carEle.dataPoints:                 
                 previousDate = carPoint.previousDate
                 followingDate = carPoint.followingDate                 
                 accumlatedSentimentalScore = 0                    
@@ -98,8 +98,8 @@ class CarNewsOperator(Operator):
     @classmethod
     def __pricingOperator(
         cls,
-        gEleA:Element,
-        gEleB:Element) -> Element:         
+        gEleA:ElementBase,
+        gEleB:ElementBase) -> ElementBase:         
         if type(gEleA) == PricingElement: 
             return cls.__defaultOperator(
                 gEleA.convertTo(CarNElement),
