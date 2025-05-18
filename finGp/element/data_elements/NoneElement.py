@@ -50,9 +50,19 @@ class NoneElement(Element):
         return NoneDataPoint
     
     @property
-    def inDict(self)->dict[int,NoneDataPoint]:
+    def __inDict(self)->dict[int,NoneDataPoint]:
         return dict()
 
+    @property
+    def items(self):
+        """
+        Returns an iterable view of (key, DataPoint) pairs contained in this Element,
+        allowing iteration over all DataPoints.
+        """
+        return self.__inDict.items()
+
+
+        
 
     def acceptVistor(self,v):
         return v.visitNoneElement(self)
@@ -68,9 +78,56 @@ class NoneElement(Element):
         return False 
     
     
-    def convertTo(self,targetClass:type[Element])->Element:
+    def convertTo(self,targetTemplate:Element | type[Element])->Element:
         pass     
     
     @classmethod
     def getConveribleClasses(cls)->list[type[Element]]:
         return []    
+    
+    def intersect(self, other: 'Element') -> 'Element':
+        """
+        Return a new Element containing only the DataPoints that are present in both
+        this Element and the other Element, as determined by their identity or hash.
+
+        Args:
+            other (Element): Another Element to intersect with.
+
+        Returns:
+            Element: A new Element instance with the intersection of DataPoints.
+        """
+        # Get the intersection of hash keys
+        common_hashes = set(self.__inDict.keys()) & set(other.__inDict.keys())
+        # Collect DataPoints from self that have these hashes
+        intersected_points = [self.__inDict[h] for h in common_hashes]
+        # Create a new Element of the same type with these points
+        return type(self)(intersected_points)    
+
+    @classmethod
+    def intersectMany(cls, *elements: 'Element') -> list['Element']:
+        """
+        Return a list of Elements, where each element is the intersection of that element
+        with all the others in the provided arguments.
+
+        Args:
+            *elements (Element): Two or more Element instances to intersect.
+
+        Returns:
+            list[Element]: A list of Element instances, each intersected with all others.
+
+        Raises:
+            ValueError: If fewer than two elements are provided.
+        """
+        if len(elements) < 2:
+            raise ValueError("At least two Element instances are required for intersection.")
+
+        result = []
+        for idx, elem in enumerate(elements):
+            # Intersect this element with all others
+            others = elements[:idx] + elements[idx+1:]
+            common_hashes = set(elem.__inDict.keys())
+            for other in others:
+                common_hashes &= set(other.__inDict.keys())
+            intersected_points = [elem.__inDict[h] for h in common_hashes]
+            result.append(type(elem)(intersected_points))
+        return result    

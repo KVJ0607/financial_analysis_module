@@ -45,7 +45,7 @@ class Group:
         selfStr =  f'share:{self.shareCode}'
         for subclass in element.Element.__subclasses__(): 
             if self.containElementData(subclass):
-                selfStr += f"""\n{subclass} have {len(self.getElement(subclass).inDict)} Data"""
+                selfStr += f"""\n{subclass} have {len(self.getElement(subclass).items)} Data"""
             else: 
                 selfStr+=f"""\n{subclass} is empty"""
         return selfStr
@@ -118,13 +118,13 @@ class Group:
 
     def getElement(
         self,
-        eleClass: Type[element.Element]
+        eleTemplate: element.Element|type[element.Element]
     ) -> element.Element:
         """
         Retrieve an element of the specified class from the Cayley table.
 
         Args:
-            eleClass (Type[element.Element]): The class of the element to retrieve.
+            eleTemplate (element.Element|type[element.Element]): The element to retrieve.
 
         Returns:
             element.Element: The retrieved element.
@@ -133,9 +133,18 @@ class Group:
             TypeError: If the provided class is not a subclass of element.Element.
             ValueError: If the element class cannot be resolved for the group.
         """
-        if not issubclass(eleClass, element.Element):
-            raise TypeError(f"{eleClass} is not a subclass of {element.Element}")
+        
+        
 
+        if isinstance(eleTemplate,type):
+            if issubclass(eleTemplate,element.Element):
+                eleClass = eleTemplate
+        elif isinstance(eleTemplate,element.Element): 
+            eleClass = type(eleTemplate)
+        else: 
+            raise TypeError("")    
+        
+            
         # Check if the element exists in the valued subgroup
         if eleClass in self.valuedSubgroup:
             return self.__cayleyTable[eleClass]
@@ -146,7 +155,7 @@ class Group:
             for conClass in convertibleClasses:
                 if self.containElementData(conClass):
                     self.__cayleyTable:dict[Type[element.Element],element.Element]
-                    resultElement = self.__cayleyTable.get(conClass).convertTo(eleClass)
+                    resultElement = self.__cayleyTable.get(conClass).convertTo(eleTemplate)
                     self.setCayleyElement(resultElement)
                     return resultElement
 
@@ -162,22 +171,12 @@ class Group:
                     return resultElement
 
         # If no resolution is possible, return NoneElement
-        print(f"Warning: Unable to resolve element of class {eleClass} for group {self}")
+        print(f"Warning: Unable to resolve element of class {eleClass} for group {self.shareCode}")
         return element.NoneElement()
     
 
 
                 
-    def getDataPoins(
-        self,
-        eleClass: Type[element.Element]
-    ) -> list[element.DataPoint]:      
-        
-        ele = self.getElement(eleClass)
-        dataPoints = []
-        for iPoint in ele.inDict.values():
-            dataPoints.append(iPoint)
-        return dataPoints
 
 
     def inCayleyTable(self, eleClass: Type[element.Element]) -> bool:
@@ -237,25 +236,7 @@ class Group:
     def normalizeAllGroups(
         cls,
         *args
-    ):
-        """
-        Normalize all groups by finding common elements across multiple groups and updating their Cayley tables.
-        This method takes multiple `Group` objects, identifies common valued subgroups, and computes the intersection
-        of hash sets for each common subgroup. It then updates the Cayley table of each group with the normalized elements.
-        Args:
-            cls: The class reference (used for class methods).
-            *args: A variable number of `Group` objects to be normalized.
-        Raises:
-            Exception: If fewer than two groups are provided.
-        Notes:
-            - The method assumes that each `Group` object has the following attributes and methods:
-                - `valuedSubgroup`: A dictionary containing subgroup values.
-                - `getElement(iClass)`: A method that retrieves an element of the group for a given class.
-                - `cayleyTable`: A dictionary representing the group's Cayley table.
-                - `hashSet`: A set of hash values associated with a group element.
-                - `inDict`: A dictionary mapping hash values to points.
-            - The `iClass` is expected to be callable to create a new element with a list of points.
-        """        
+    ):   
         
         groups: list[Group] = list(args)
 
@@ -265,85 +246,22 @@ class Group:
         firstGroup = groups[0]
                     
         
-        commonValuedGroup = set(
+        commonElement = set(
             firstGroup.valuedSubgroup.keys()
         )
         
         
         for iGroup in groups[1:]:
-            commonValuedGroup.intersection_update(iGroup.valuedSubgroup.keys())
+            commonElement.intersection_update(iGroup.valuedSubgroup.keys())
         
 
-        for iClass in commonValuedGroup:
-            hashsIntersection = groups[0].getElement(iClass).hashSet
+        for iClass in commonElement:
+            goodElements = iClass.intersectMany(*[x.getElement(iClass) for x in groups])
+            
+            
+            for i,jGroup in enumerate(groups):
+                jGroup.__cayleyTable[iClass] = goodElements[i]
 
-            for jGroup in groups[1:]:
-                jGroup: Group
-                hashsIntersection.intersection_update(
-                    jGroup.getElement(iClass).hashSet
-                )
-                
-
-            for jGroup in groups:
-                iEleInJGroup = jGroup.getElement(iClass).inDict
-                goodPoints = [
-                    v for k, v in iEleInJGroup.items() if k in hashsIntersection
-                ]
-                goodElement = iClass(goodPoints)
-                jGroup.__cayleyTable[iClass] = goodElement
-
-    @classmethod
-    def operateElementwiseInAClassSpace(
-        cls,
-        groupA: Group,
-        groupB: Group,
-        spaceOfClass: type[element.Element],
-        pointwiseOperation: Callable
-    ) -> element.Element:
-        """
-        Perform an element-wise operation in a specific class space.
-
-        Args:
-            groupA (Group): The first group.
-            groupB (Group): The second group.
-            spaceOfClass (type): The class space to operate in.
-            pointwiseOperation (Callable): The operation to perform.
-
-        Returns:
-            Element: The resulting element from the operation.
-
-        Raises:
-            ValueError: If the required element class is not found in either group.
-        """
-        
-        if not issubclass(spaceOfClass,element.Element):
-            print(f"""Waring: {spaceOfClass} 
-                  is not a subclass of {element.Element}""")
-            return element.NoneElement
-        
-        if not groupA.containElementData(spaceOfClass):
-            groupA.__cayleyTable[spaceOfClass]= element.NoneElement()
-
-        if not groupB.containElementData(spaceOfClass):
-            groupB.__cayleyTable[spaceOfClass] = element.NoneElement()
-
-        spaceElementA = groupA.getElement(spaceOfClass)
-        spaceElementB = groupB.getElement(spaceOfClass)
-        if isinstance(spaceElementA, element.NoneElement):
-            raise ValueError(f"""{groupA} doesn't have point class 
-                            {spaceOfClass} data""")
-        elif isinstance(spaceElementB, element.NoneElement):
-            raise ValueError(f"""{groupB} doesn't have point class 
-                            {spaceOfClass} data""")
-
-        products = []
-        for aHash in spaceElementA.inDict:
-            if aHash in spaceElementB.inDict:
-                products.append(pointwiseOperation(
-                    spaceElementA.inDict[aHash],
-                    spaceElementB.inDict[aHash]
-                ))
-        return type(spaceElementA)(products)
 
 
 

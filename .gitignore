@@ -1,0 +1,6 @@
+test*
+*.pyc
+*.exe
+*.dll
+*.so
+*.lib

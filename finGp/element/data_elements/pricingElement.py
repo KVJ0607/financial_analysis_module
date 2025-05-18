@@ -66,19 +66,20 @@ class PricingDataPoint(DataPoint):
     
 
 class PricingElement(Element):
-    def __init__(self,points:list[PricingDataPoint]):
-        self.inDict = points 
+    def __init__(self,points:list[PricingDataPoint]=[]):
+        self.__inDict = points 
     
     @property    
     def pointType(self)->type[DataPoint]: 
         return PricingDataPoint  
          
     @property
-    def inDict(self)->dict[int,PricingDataPoint]: 
+    def __inDict(self)->dict[int,PricingDataPoint]: 
         return self.__element
     
-    @inDict.setter
-    def inDict(self,val:list[DataPoint]):
+        
+    @__inDict.setter
+    def __inDict(self,val:list[DataPoint]):
         validPoints = dict()
         for iPoint in val: 
             if isinstance(iPoint,PricingDataPoint):
@@ -86,12 +87,17 @@ class PricingElement(Element):
                     validPoints[iPoint.__hash__()]= iPoint
         self.__element = validPoints                     
 
-    
+    @property
+    def items(self):
+        """
+        Returns an iterable view of (key, DataPoint) pairs contained in this Element,
+        allowing iteration over all DataPoints.
+        """
+        return self.__inDict.items()    
     
     @property
     def dates(self) -> Iterator[DateRepresentation]:
-        return (iEle.date for iEle in self.inDict.values())
-    
+        return (iEle.date for iEle in self.__inDict.values())
 
     def acceptVistor(self,v):
         return v.visitPricingElement(self)    
@@ -111,16 +117,25 @@ class PricingElement(Element):
             return False
     
     
-    def convertTo(self,targetClass:type[Element])->Element:
-        if targetClass == CarNElement:
-            return self.__convertToCarNColl()  
+    def convertTo(
+        self,
+        targetTemplate:Element|type[Element])->Element:
+        
+        if (type(targetTemplate) == CarNElement
+            or issubclass(targetTemplate,CarNElement)):
+            return self.__convertToCarNColl(targetTemplate)  
         
         
-    def __convertToCarNColl(self,nDay:int=3)->Element|CarNElement: 
-        if nDay//2 == 0: 
-            raise ValueError("nDay should be an odd number")
-        if nDay < 1: 
-            raise ValueError("nDay should be a positive number")
+    def __convertToCarNColl(
+        self,
+        targetTemplate:CarNElement|type[CarNElement])->Element|CarNElement: 
+        if isinstance(targetTemplate,CarNElement):
+            nDay = targetTemplate.interval
+        elif issubclass(targetTemplate,CarNElement):
+            nDay = 3
+        else:
+            raise TypeError("Unsupported targetTemplate type for conversion.")
+        
         deltaDay = (nDay - 1) // 2  # Ensure nDay is an integer
         
         dateList = sorted(self.dates)
@@ -142,15 +157,62 @@ class PricingElement(Element):
                         (nextPoint.adjClose - lastPoint.adjClose) / lastPoint.adjClose,
                         nDay)
                     )
-        print("Number of points: ", len(carNPoints))
         return CarNElement(carNPoints)
 
     
     def getPointFrom(self,date:DateRepresentation)->PricingDataPoint:
         hashStr = ("12"+str(date).replace('-',''))        
-        return self.inDict.get(int(hashStr),NoneDataPoint)    
+        return self.__inDict.get(int(hashStr),NoneDataPoint)    
     
 
     @classmethod
     def getConveribleClasses(cls)->list[type[Element]]:
         return [CarNElement]    
+    
+
+    def intersect(self, other: 'Element') -> 'Element':
+        """
+        Return a new Element containing only the DataPoints that are present in both
+        this Element and the other Element, as determined by their identity or hash.
+
+        Args:
+            other (Element): Another Element to intersect with.
+
+        Returns:
+            Element: A new Element instance with the intersection of DataPoints.
+        """
+        # Get the intersection of hash keys
+        common_hashes = set(self.__inDict.keys()) & set(other.__inDict.keys())
+        # Collect DataPoints from self that have these hashes
+        intersected_points = [self.__inDict[h] for h in common_hashes]
+        # Create a new Element of the same type with these points
+        return type(self)(intersected_points)    
+
+    @classmethod
+    def intersectMany(cls, *elements: 'Element') -> list['Element']:
+        """
+        Return a list of Elements, where each element is the intersection of that element
+        with all the others in the provided arguments.
+
+        Args:
+            *elements (Element): Two or more Element instances to intersect.
+
+        Returns:
+            list[Element]: A list of Element instances, each intersected with all others.
+
+        Raises:
+            ValueError: If fewer than two elements are provided.
+        """
+        if len(elements) < 2:
+            raise ValueError("At least two Element instances are required for intersection.")
+
+        result = []
+        for idx, elem in enumerate(elements):
+            # Intersect this element with all others
+            others = elements[:idx] + elements[idx+1:]
+            common_hashes = set(elem.__inDict.keys())
+            for other in others:
+                common_hashes &= set(other.__inDict.keys())
+            intersected_points = [elem.__inDict[h] for h in common_hashes]
+            result.append(type(elem)(intersected_points))
+        return result    

@@ -74,7 +74,7 @@ class CarNewsOperator(Operator):
         
         carNewsDataPoints = []
         try:
-            for carHash,carPoint in carEle.inDict.items():                 
+            for carHash,carPoint in carEle.items:                 
                 previousDate = carPoint.previousDate
                 followingDate = carPoint.followingDate                 
                 accumlatedSentimentalScore = 0                    

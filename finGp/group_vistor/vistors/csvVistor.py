@@ -11,7 +11,7 @@ class CsvVistor(Vistor):
         cEle: element.CarNElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN"]]
-        for iHash, iCar in cEle.inDict.items():
+        for iHash, iCar in cEle.items:
             if iCar.valid():
                 eleList.append([
                     str(iCar.date),
@@ -28,7 +28,7 @@ class CsvVistor(Vistor):
         nEle: element.NewsElement)->list[list[str]]:
         
         eleList = [["date", "siteAddress", "sentimentalScore"]]
-        for iHash, iNews in nEle.inDict.items():
+        for iHash, iNews in nEle.items:
             if iNews.valid():
                 eleList.append([
                     str(iNews.date),
@@ -48,7 +48,7 @@ class CsvVistor(Vistor):
         pEle: element.PricingElement)->list[list[str]]:
         
         eleList = [["date", "adjusted_close"]]
-        for iHash, iPrice in pEle.inDict.items():
+        for iHash, iPrice in pEle.items:
             if iPrice.valid():
                 eleList.append([
                     str(iPrice.date),
@@ -62,7 +62,7 @@ class CsvVistor(Vistor):
         cN_ele: element.CarNewsElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN", "SentimentalScore"]]
-        for iHash, iCar in cN_ele.inDict.items():
+        for iHash, iCar in cN_ele.items:
             if iCar.valid():
                 eleList.append([
                     str(iCar.date),
