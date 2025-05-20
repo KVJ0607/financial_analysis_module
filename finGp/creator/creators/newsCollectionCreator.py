@@ -1,9 +1,9 @@
 import csv
 
-from ...date_utils import DateRepresentation
-from ...element import NoneDataPoint, NewsDataPoint
+from ..._date_utils import DateRepresentation
+from ...element import NoneDataPoint,NewsDataPoint
 from ...group import Group
-from ...shareEntity import ShareEntity              
+from ..._shareEntity import ShareEntity              
 
 
 class NewsCollectionCreator:

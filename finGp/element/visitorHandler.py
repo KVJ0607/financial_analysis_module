@@ -1,12 +1,13 @@
 from abc import ABC,abstractmethod
 
-class VisitorMixin(ABC):
+class VisitorHandler(ABC):
+    
     @abstractmethod
-    def acceptVisitor(self, v):
+    def acceptVisitor(self,v):
         pass
     
     @abstractmethod
-    def acceptOutVisitor(self, v, dest: str):
+    def acceptOutVisitor(self,v, dest: str):
         pass
     
 

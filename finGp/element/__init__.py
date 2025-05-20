@@ -1,20 +1,25 @@
-from .base import DataPointBase,ElementBase
+from .base import DataPoint,Element
 
-from .data_elements.pricingElement import PricingDataPoint,PricingElement
-from .data_elements.carNElement import CarNDataPoint,CarNElement
-from .data_elements.newsElement import NewsDataPoint,NewsElement
-from .data_elements.NoneElement import NoneDataPoint,NoneElement
-from .data_elements.carNewsElement import CarNewsDataPoint,CarNewsElement
+from .visitorHandler import VisitorHandler
+from ._helpers.conversion import Conversion
+from ._helpers.setops import SetOps
+from .helper.non_generator.registry import Registry
 
-from .conversionMixin import ConversionMixin
-from .setopsMixin import SetOpsMixin
-from .visitorMixin import VisitorMixin
+from .elements.noneElement import NoneElement,NoneDataPoint
+from .elements.carN.element import CarNElement,CarNDataPoint
+from .elements.carN_news.element import CarNewsElement,CarNewsDataPoint
+from .elements.news.element import NewsElement,NewsDataPoint
+from .elements.pricing.element import PricingElement,PricingDataPoint
+from .visitorHandler import VisitorHandler
 
-
-__all__ = ["DataPointBase", "ElementBase",
-           "PricingDataPoint","PricingElement",           
-            "CarNDataPoint","CarNElement",
-           "NoneDataPoint","NoneElement",
-           "NewsDataPoint","NewsElement",
-           "CarNewsDataPoint","CarNewsElement",
-           "ConversionMixin","SetOpsMixin","VisitorMixin"]
+__all__ = [
+    "DataPoint","Element","VisitorHandler",
+    "Conversion",
+    "SetOps",
+    "Registry",
+    "NoneElement","NoneDataPoint",
+    "CarNElement","CarNDataPoint",
+    "CarNewsElement","CarNewsDataPoint",
+    "NewsElement","NewsDataPoint",
+    "PricingElement","PricingDataPoint"
+]

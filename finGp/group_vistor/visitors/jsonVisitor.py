@@ -34,7 +34,7 @@ class JsonStrVistor(Visitor):
             if iNews.valid():
                 eleList.append({
                     'date':str(iNews.date),
-                    'siteAddress':iNews.__siteAddress,
+                    'siteAddress':iNews._siteAddress,
                     'sentimentalScore':str(iNews.sentimentalScore)
                 })
         

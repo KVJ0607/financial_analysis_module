@@ -1,9 +1,9 @@
 import csv
 
-from ...date_utils import DateRepresentation
+from ..._date_utils import DateRepresentation
 from ...element import NoneDataPoint, PricingDataPoint
 from ...group import Group
-from ...shareEntity import ShareEntity
+from ..._shareEntity import ShareEntity
 
 
 class PricingCollectionCreator:

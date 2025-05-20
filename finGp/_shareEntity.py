@@ -76,7 +76,7 @@ class MarketRegion:
 
 class NoneRegion(MarketRegion): 
     def __init__(self): 
-        self.__NoneRegion = True 
+        self._NoneRegion = True 
         
     def __str__(self): 
         return ''
@@ -91,7 +91,7 @@ class NoneEntity(ShareEntity):
     It provide ways to create and report error of share code, store its region information
     '''    
     def __init__(self,shareCode):
-        self.__code = ''
+        self._code = ''
     
     @property
     def numericalCode(self)->str:
@@ -150,28 +150,28 @@ class H_ShareEntity(ShareEntity):
             else: 
                 raise Exception("This is not a valid H-share market Code: "+hCode)    
                      
-        self.__isolatedNumericalCode=createNumericalCode(hCode)
-        self.__isolatedMarketCode=createMarketCode(hCode)
-        self.__shareCode = self.__isolatedNumericalCode +'.'+self.__isolatedMarketCode
-        self.__region = MarketRegion('Hong Kong')          
+        self._isolatedNumericalCode=createNumericalCode(hCode)
+        self._isolatedMarketCode=createMarketCode(hCode)
+        self._shareCode = self._isolatedNumericalCode +'.'+self._isolatedMarketCode
+        self._region = MarketRegion('Hong Kong')          
     
 
     @property
     def marketCode(self)->str: 
-        return self.__isolatedMarketCode
+        return self._isolatedMarketCode
 
     @property
     def numericalCode(self)->str: 
-        return self.__isolatedNumericalCode
+        return self._isolatedNumericalCode
     
         
     @property
     def shareCode(self)->str:
-        return self.__shareCode  
+        return self._shareCode  
     
     @property
     def region(self)->MarketRegion:
-        return  self.__region    
+        return  self._region    
                         
     @classmethod
     def validableCode(cls,inputStr:str)->bool:
@@ -221,27 +221,27 @@ class A_ShareEntity(ShareEntity):
             else: 
                 raise Exception("This is not a valid A-share market Code: "+aCode)  
                     
-        self.__numericalCode=createNumericalCode(aCode)
-        self.__marketCode=createMarketCode(aCode)      
-        self.__shareCode = self.__numericalCode +'.'+self.__marketCode 
-        self.__region = MarketRegion('China')  
+        self._numericalCode=createNumericalCode(aCode)
+        self._marketCode=createMarketCode(aCode)      
+        self._shareCode = self._numericalCode +'.'+self._marketCode 
+        self._region = MarketRegion('China')  
         
     @property
     def marketCode(self)->str: 
-        return self.__marketCode
+        return self._marketCode
 
     @property
     def numericalCode(self)->str: 
-        return self.__numericalCode
+        return self._numericalCode
     
         
     @property
     def shareCode(self)->str:
-        return self.__shareCode  
+        return self._shareCode  
     
     @property
     def region(self)->MarketRegion:
-        return  self.__region      
+        return  self._region      
 
 
     @staticmethod

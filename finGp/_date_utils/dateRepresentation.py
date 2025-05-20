@@ -16,19 +16,19 @@ class DateRepresentation:
     def __init__(self,dateGeneric,nullDay:bool=False):     
         
         if nullDay:
-            self.__dateTimeDate = datetime.date(1,1,1)
-            self.__nullDay = True
+            self._dateTimeDate = datetime.date(1,1,1)
+            self._nullDay = True
             return
         
         try:           
             self.dateTimeDate = dateGeneric
-            self.__nullDay = False
+            self._nullDay = False
         except InvalidDateType as e:
-            self.__dateTimeDate = datetime.date(1,1,1)
-            self.__nullDay = True
+            self._dateTimeDate = datetime.date(1,1,1)
+            self._nullDay = True
     
     def __str__(self): 
-        if self.__nullDay: 
+        if self._nullDay: 
             return 'None'
         else: 
             return self.standardFormat
@@ -38,15 +38,15 @@ class DateRepresentation:
         """Return the object in the class datetime.date
         return datetime.date(1,1,1) if this is a null day        
         """
-        return self.__dateTimeDate  
+        return self._dateTimeDate  
     
     @dateTimeDate.setter
     def dateTimeDate(self,dateGeneric):
-        self.__dateTimeDate = self.toDateTimeDate(dateGeneric)        
+        self._dateTimeDate = self.toDateTimeDate(dateGeneric)        
     
     @property
     def isNullDay(self)->bool:
-        return self.__nullDay    
+        return self._nullDay    
     
 
     @property
@@ -54,8 +54,8 @@ class DateRepresentation:
         """Return the date in yyyy-mm-dd
         Return '9999-13-33' if nullday
         """
-        if DateRepresentation.isValid(self):        
-            return self._dateTimeToStandardFormat(self.__dateTimeDate)
+        if DateRepresentation.isValidDateObj(self):        
+            return self._dateTimeToStandardFormat(self._dateTimeDate)
         else: 
             return "9999-13-33"
     
@@ -147,7 +147,7 @@ class DateRepresentation:
         else:
             mToday = self.dateTimeDate
             mNewDay = mToday + datetime.timedelta(days=int(nDay))
-            self.__dateTimeDate = mNewDay            
+            self._dateTimeDate = mNewDay            
 
 
     def createPrevious_N_Day(self,integer_N:int):
@@ -168,13 +168,13 @@ class DateRepresentation:
     def getDateRange(cls,startedDateIncluded,endDateInclueded)->list['DateRepresentation']:  
         """Return an ascending order list of DateRepresentation
         """        
-        dateList = cls.__getDateRangeInStr(startedDateIncluded, endDateInclueded)        
+        dateList = cls._getDateRangeInStr(startedDateIncluded, endDateInclueded)        
         for i in range(len(dateList)):
             dateList[i] = cls(dateList[i])                
         return dateList
 
     @classmethod
-    def __getDateRangeInStr(cls, startedDateIncluded, endDateInclueded)->list[str]:
+    def _getDateRangeInStr(cls, startedDateIncluded, endDateInclueded)->list[str]:
         startD = cls(startedDateIncluded)
         endD = cls(endDateInclueded)   
         dateList=[]
@@ -184,12 +184,12 @@ class DateRepresentation:
         return dateList
         
     @classmethod
-    def isValid(cls,dateObj): 
+    def isValidDateObj(cls,dateObj): 
         """Return if the dateObj is convertable to DateRepresentation"""        
         if isinstance(dateObj,DateRepresentation):
             if not dateObj.isNullDay:
                 return True
-        elif isinstance(dateObj,str) and cls.__checkIfDateStandardFormat(dateObj):
+        elif isinstance(dateObj,str) and cls._checkIfDateStandardFormat(dateObj):
             return True
         elif isinstance(dateObj,datetime.date):
             return True
@@ -197,7 +197,7 @@ class DateRepresentation:
             return False
         
     @staticmethod
-    def __checkIfDateStandardFormat(dateString)->bool:
+    def _checkIfDateStandardFormat(dateString)->bool:
         datePatten = r'\d{4}-(?:\d{2}|\d{1})-(?:\d{2}|\d{1})'
         return re.match(datePatten,dateString) 
 
@@ -230,7 +230,7 @@ class DateRepresentation:
     def _determineDateType(cls,dateToBeDetermined)->str:
         if isinstance(dateToBeDetermined,DateRepresentation):
             return cls._dateTypeFlag[2]
-        elif isinstance(dateToBeDetermined,str) and DateRepresentation.__checkIfDateStandardFormat(dateToBeDetermined):
+        elif isinstance(dateToBeDetermined,str) and DateRepresentation._checkIfDateStandardFormat(dateToBeDetermined):
             return cls._dateTypeFlag[0]
         elif isinstance(dateToBeDetermined,datetime.date):
             return cls._dateTypeFlag[1]

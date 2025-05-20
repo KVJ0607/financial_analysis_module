@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
- 
-
+from typing import TypeVar 
 
 
 
@@ -16,9 +15,9 @@ class Operator(ABC) :
     having different pointType attribute.
     """
     
-    @property
+    @classmethod
     @abstractmethod
-    def productClass(self):
+    def getProductClass(cls)->type:
         pass 
         
         
@@ -62,6 +61,6 @@ class Operator(ABC) :
         cls,
         targetClass)->type[Operator]:
         for subclass in cls.__subclasses__():
-            if targetClass == subclass.productClass:
+            if targetClass == subclass.getProductClass():
                 return subclass
         return None

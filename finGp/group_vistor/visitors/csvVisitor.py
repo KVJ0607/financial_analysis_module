@@ -11,7 +11,7 @@ class CsvVistor(Visitor):
         cEle: element.CarNElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN"]]
-        for iHash, iCar in cEle.dataPoints:
+        for iCar in cEle.dataPoints:
             if iCar.valid():
                 eleList.append([
                     str(iCar.date),
@@ -28,11 +28,11 @@ class CsvVistor(Visitor):
         nEle: element.NewsElement)->list[list[str]]:
         
         eleList = [["date", "siteAddress", "sentimentalScore"]]
-        for iHash, iNews in nEle.dataPoints:
+        for iNews in nEle.dataPoints:
             if iNews.valid():
                 eleList.append([
                     str(iNews.date),
-                    iNews.__siteAddress,
+                    iNews._siteAddress,
                     str(iNews.sentimentalScore)
                 ])
         
@@ -46,9 +46,13 @@ class CsvVistor(Visitor):
     def visitPricingElement(
         self,
         pEle: element.PricingElement)->list[list[str]]:
-        
+        if not isinstance(pEle,element.PricingElement):
+            if isinstance(pEle,element.NoneElement):
+                return []
+            else:
+                raise TypeError(f"Input is not a PricingElement instance but {type[pEle]}")
         eleList = [["date", "adjusted_close"]]
-        for iHash, iPrice in pEle.dataPoints:
+        for iPrice in pEle.dataPoints:
             if iPrice.valid():
                 eleList.append([
                     str(iPrice.date),
@@ -62,7 +66,7 @@ class CsvVistor(Visitor):
         cN_ele: element.CarNewsElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN", "SentimentalScore"]]
-        for iHash, iCar in cN_ele.dataPoints:
+        for iCar in cN_ele.dataPoints:
             if iCar.valid():
                 eleList.append([
                     str(iCar.date),

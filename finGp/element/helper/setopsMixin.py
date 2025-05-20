@@ -1,8 +1,14 @@
 from typing import TypeVar, Type, List
+from ..base import Element
 
-T = TypeVar('T', bound='SetOpsMixin')
+T = TypeVar('T', bound=Element)
 
 class SetOpsMixin:
+    
+    def __init__(self,dataPoints,elementCls:Type): 
+        self.dataPoints = dataPoints
+        self.elementCls = elementCls
+    
     def intersect(self: T, other: T) -> T:
         """
         Return a new instance containing only DataPoints present in both self and other.
@@ -14,14 +20,14 @@ class SetOpsMixin:
             SetOpsMixin: A new instance with intersected DataPoints.
         """
         # Build hash maps for fast lookup
-        self_hashes = {hash(dp): dp for  dp in self.dataPoint}
-        other_hashes = {hash(dp): dp for dp in other.dataPoint}
+        self_hashes = {hash(dp): dp for  dp in self.dataPoints}
+        other_hashes = {hash(dp): dp for dp in other.dataPoints}
         common_hashes = set(self_hashes) & set(other_hashes)
         intersected_points = [self_hashes[h] for h in common_hashes]
-        return type(self)(intersected_points)
+        return self.elementCls(intersected_points)
 
-    @classmethod
-    def intersectMany(cls: Type[T], *elements: T) -> List[T]:
+    @staticmethod
+    def intersectMany(*elements: T) -> List[T]:
         """
         Return a list of elements, where each element is the intersection of that element
         with all the others in the provided arguments.
