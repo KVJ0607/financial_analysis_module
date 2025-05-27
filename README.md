@@ -1,5 +1,7 @@
 # Financial Analysis Module
 
+[![GitHub Repo](https://img.shields.io/github/stars/KVJ0607/financial_analysis_module?style=social)](https://github.com/KVJ0607/financial_analysis_module)
+
 A modular Python package for advanced financial data analysis, supporting event studies, pricing data, news sentiment, and flexible group operations.
 
 ---
@@ -21,6 +23,9 @@ A modular Python package for advanced financial data analysis, supporting event 
 - **Flexible Registry System:**  
   Register and manage custom element types and requirements for extensibility.
 
+- **CSV Data Import:**  
+  Use `PricingCollectionCreator` and `NewsCollectionCreator` to load pricing and news sentiment data from CSV files with customizable column mapping.
+
 ---
 
 ## Installation
@@ -28,7 +33,7 @@ A modular Python package for advanced financial data analysis, supporting event 
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/financial_analysis_module.git
+git clone https://github.com/KVJ0607/financial_analysis_module.git
 cd financial_analysis_module
 pip install -r requirements.txt
 ```
@@ -41,9 +46,12 @@ pip install -r requirements.txt
 import finGp
 
 # Load pricing and news data
-firstTractorH = finGp.creator.PricingCollectionCreator.getInstacnefromCsv("example_data/hshare/0038.HK.csv", shareCode='0038.HK')
-firstTractorA = finGp.creator.PricingCollectionCreator.getInstacnefromCsv("example_data/ashare/601038.SH.csv", shareCode='601038.SH')
-newsSentiment = finGp.creator.NewsCollectionCreator.getInstacnefromCsv("example_data/sentiment/test_data.csv", shareCode='0038.HK')
+firstTractorH = finGp.creator.PricingCollectionCreator.getInstacnefromCsv(
+    "example_data/hshare/0038.HK.csv", shareCode='0038.HK')
+firstTractorA = finGp.creator.PricingCollectionCreator.getInstacnefromCsv(
+    "example_data/ashare/601038.SH.csv", shareCode='601038.SH')
+newsSentiment = finGp.creator.NewsCollectionCreator.getInstacnefromCsv(
+    "example_data/sentiment/test_data.csv", shareCode='0038.HK')
 
 # Join news sentiment to pricing groups
 firstTractorA.joinGroupTable(newsSentiment)
@@ -63,6 +71,23 @@ print("done")
 
 ---
 
+## Example: Customizing CSV Import
+
+You can specify which columns in your CSV correspond to date, site address, and sentiment score:
+
+```python
+newsSentiment = finGp.creator.NewsCollectionCreator.getInstacnefromCsv(
+    "example_data/sentiment/test_data.csv",
+    shareCode='0038.HK',
+    dateIndex=0,
+    siteAddressIndex=1,
+    sentimentalScoreIndex=2,
+    isHeading=True
+)
+```
+
+---
+
 ## Package Structure
 
 ```
@@ -73,13 +98,21 @@ finGp/
     _date_utils/
     _operator/
     creator/
+        creators/
+            newsCollectionCreator.py
+            pricingCollectionCreator.py
     element/
     group_vistor/
+example_data/
+    hshare/
+    ashare/
+    sentiment/
+output/
 ```
 
 - **element/**: Core data models (`DataPoint`, `Element`), element types (pricing, news, etc.), and set/convert helpers.
 - **group.py**: The main `Group` class for managing and operating on collections of elements.
-- **creator/**: Utilities for loading data from CSV and other sources.
+- **creator/creators/**: Utilities for loading data from CSV and other sources.
 - **group_vistor/**: Visitor pattern implementations for exporting or processing groups.
 - **_operator/**: Operator classes for combining elements (e.g., pricing + news).
 
@@ -117,6 +150,13 @@ MIT License
 
 ---
 
+## Links
+
+- [Project Repository](https://github.com/KVJ0607/financial_analysis_module)
+- [Example Data](https://github.com/KVJ0607/financial_analysis_module/tree/main/example_data)
+
+---
+
 ## Contact
 
-For questions or suggestions, open an issue or contact [yourname@domain.com](mailto:yourname@domain.com).
+For questions or suggestions, open an issue or contact [Kelvin Yuen](mailto:kelvinyuen0607@gmail.com).
