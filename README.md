@@ -159,4 +159,4 @@ MIT License
 
 ## Contact
 
-For questions or suggestions, open an issue or contact [Kelvin Yuen](mailto:kelvinyuen0607@gmail.com).
+For questions or suggestions, open an issue or contact [Sean Yuen](mailto:siukwanyuen@icloud.com).
