@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from ...._date_utils import DateRepresentation
 from ...base import DataPoint,Element     
-from ..._helpers.setops import SetOps
 
 from .accept import NewsVisitorHandler
 
@@ -60,7 +59,7 @@ class NewsDataPoint(DataPoint):
 
     
     
-class NewsElement(Element,SetOps):
+class NewsElement(Element):
     def __init__(self,points:list[NewsDataPoint]=[]):
         self.dataPoints = points        
     
@@ -76,8 +75,8 @@ class NewsElement(Element,SetOps):
                     validPoints.append(iPoint)
         self._dataPoints = validPoints
 
-    @property
-    def visitorHandler(self)->NewsVisitorHandler:
+    
+    def getVisitorHandler(self)->NewsVisitorHandler:
         return NewsVisitorHandler(self)
 
     @classmethod

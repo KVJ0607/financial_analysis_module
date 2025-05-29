@@ -55,6 +55,7 @@ class NoneVisitorHandler(VisitorHandler):
 class NoneElement(Element):    
     def __init__(self): self._items = []      
     
+    def __bool__(self): return False
 
     @property
     def dataPoints(self): return self._items
@@ -62,8 +63,8 @@ class NoneElement(Element):
     @dataPoints.setter
     def dataPoints(self, points): self._items = []
 
-    @property
-    def visitorHandler(self)->NoneVisitorHandler:
+    
+    def getVisitorHandler(self)->NoneVisitorHandler:
         return NoneVisitorHandler(self)
     
     @classmethod

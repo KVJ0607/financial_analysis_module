@@ -2,7 +2,7 @@ import csv
 
 from ..._date_utils import DateRepresentation
 from ...element import NoneDataPoint,NewsDataPoint
-from ...group import Group
+from ...group.group import Group
 from ..._shareEntity import ShareEntity              
 
 

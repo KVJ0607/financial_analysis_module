@@ -1,13 +1,10 @@
 from .base import DataPoint,Element
 
 from .visitorHandler import VisitorHandler
-from ._helpers.conversion import Conversion
-from ._helpers.setops import SetOps
-from .helper.non_generator.registry import Registry
 
 from .elements.noneElement import NoneElement,NoneDataPoint
-from .elements.carN.element import CarNElement,CarNDataPoint
-from .elements.carN_news.element import CarNewsElement,CarNewsDataPoint
+from .elements.car3.element import Car3Element,Car3DataPoint
+from .elements.car3_news.element import Car3NewsElement,Car3NewsDataPoint
 from .elements.news.element import NewsElement,NewsDataPoint
 from .elements.pricing.element import PricingElement,PricingDataPoint
 from .visitorHandler import VisitorHandler
@@ -15,11 +12,10 @@ from .visitorHandler import VisitorHandler
 __all__ = [
     "DataPoint","Element","VisitorHandler",
     "Conversion",
-    "SetOps",
     "Registry",
     "NoneElement","NoneDataPoint",
-    "CarNElement","CarNDataPoint",
-    "CarNewsElement","CarNewsDataPoint",
+    "Car3Element","Car3DataPoint",
+    "Car3NewsElement","Car3NewsDataPoint",
     "NewsElement","NewsDataPoint",
     "PricingElement","PricingDataPoint"
 ]

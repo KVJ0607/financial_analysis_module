@@ -4,11 +4,14 @@ from ..visitor import Visitor
 from ... import element
 
 
+
+    
+
 class CsvVistor(Visitor):
         
     def visitCarNElement(
         self,
-        cEle: element.CarNElement)->list[list[str]]:
+        cEle: element.Car3Element)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN"]]
         for iCar in cEle.dataPoints:
@@ -63,7 +66,7 @@ class CsvVistor(Visitor):
 
     def visitCarsNewsElement(
         self,
-        cN_ele: element.CarNewsElement)->list[list[str]]:
+        cN_ele: element.Car3NewsElement)->list[list[str]]:
         
         eleList = [["date", "previous_date", "follow_date", "cumulativeAbnormalReturn", "intervalN", "SentimentalScore"]]
         for iCar in cN_ele.dataPoints:

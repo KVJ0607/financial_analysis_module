@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from ...._date_utils import DateRepresentation
 from ...base import DataPoint,Element
-from .accept import CarNVisitorHandler
+from .accept import Car3VisitorHandler
 
-class CarNDataPoint(DataPoint):     
+class Car3DataPoint(DataPoint):     
     def __init__(
         self,
         previousDate:DateRepresentation|str,
         followingDate:DateRepresentation|str,
         date:DateRepresentation|str=None,
-        cumulativeAbnormalReturn:float=None,
-        intervalN:int=None): 
+        cumulativeAbnormalReturn:float=None): 
 
         self._date = DateRepresentation(date)
         self._previousDate = DateRepresentation(previousDate)
@@ -20,7 +19,7 @@ class CarNDataPoint(DataPoint):
             self._cumulativeAbnormalReturn = float(cumulativeAbnormalReturn)
         except: 
             self._cumulativeAbnormalReturn = None 
-        self._intervalN = intervalN
+        self._intervalN = 3
 
 
     def __hash__(self): 
@@ -57,52 +56,49 @@ class CarNDataPoint(DataPoint):
         validB = DateRepresentation.isValidDateObj(self._previousDate)
         validC = DateRepresentation.isValidDateObj(self._followingDate)
         validD = self._cumulativeAbnormalReturn is not None and isinstance(self._cumulativeAbnormalReturn, (int, float))
-        validE = (isinstance(self._intervalN,int) 
-                    and self._intervalN > 2 
-                    and self._intervalN % 2 == 1)
-        if validA and validB and validC and validD and validE:
+        if validA and validB and validC and validD:
             return  True
         else:
             return False
 
     
     @classmethod
-    def correspondingGroupElement(cls)->type[CarNElement]:
-        return CarNElement       
+    def correspondingGroupElement(cls)->type[Car3Element]:
+        return Car3Element       
 
     @classmethod
-    def getGroupElement(cls, points:list[CarNDataPoint]):
-        return CarNElement(points)
+    def getGroupElement(cls, points:list[Car3DataPoint]):
+        return Car3Element(points)
 
 
 
-class CarNElement(Element):         
-    def __init__(self,points:list[CarNDataPoint]=None,interval=3):            
+class Car3Element(Element):         
+    def __init__(self,points:list[Car3DataPoint]=None):            
         if points is None:
             points = []              
         self._dataPoints = []
         self.dataPoints = points   # This will validate and set self._items  
         
         
-        self.interval = interval
+        self.interval = 3
         
 
     @property
-    def dataPoints(self)->list[CarNDataPoint]: 
+    def dataPoints(self)->list[Car3DataPoint]: 
         return self._dataPoints
 
     @dataPoints.setter
     def dataPoints(self,points):
         validPoints = []
         for iPoint in points:
-            if isinstance(iPoint,CarNDataPoint) and iPoint.valid():                
+            if isinstance(iPoint,Car3DataPoint) and iPoint.valid():                
                 validPoints.append(iPoint)
         self._dataPoints = validPoints
         
   
-    @property
-    def visitorHandler(self)->CarNVisitorHandler:
-        return CarNVisitorHandler(self)    
+    
+    def getVisitorHandler(self)->Car3VisitorHandler:
+        return Car3VisitorHandler(self)    
     
     @property
     def interval(self)->int:
@@ -117,8 +113,8 @@ class CarNElement(Element):
         self._interval = nDay   
 
     @classmethod
-    def pointType(cls)->type[CarNDataPoint]:
-        return CarNDataPoint
+    def pointType(cls)->type[Car3DataPoint]:
+        return Car3DataPoint
 
 
     

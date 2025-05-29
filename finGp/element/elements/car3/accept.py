@@ -1,6 +1,6 @@
 from ...visitorHandler import VisitorHandler
 
-class CarNVisitorHandler(VisitorHandler):
+class Car3VisitorHandler(VisitorHandler):
 
     def __init__(self,element):         
         self.element = element

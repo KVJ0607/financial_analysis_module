@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from ...._date_utils import DateRepresentation
 from ... import DataPoint,Element
-from ...elements.carN.element  import CarNDataPoint
+from ...elements.car3.element  import Car3DataPoint
 from ...elements.noneElement import NoneDataPoint
 
 from .accept import CarNewsVisitorHandler
     
-class CarNewsDataPoint(DataPoint):
-    def __init__(self,carN:CarNDataPoint,accumlatedSentimentalScore:float=None):
-        if isinstance(carN,CarNDataPoint):
+class Car3NewsDataPoint(DataPoint):
+    def __init__(self,carN:Car3DataPoint,accumlatedSentimentalScore:float=None):
+        if isinstance(carN,Car3DataPoint):
             self.carN = carN
         else:
             self.carN = NoneDataPoint()
@@ -30,40 +30,40 @@ class CarNewsDataPoint(DataPoint):
                 and isinstance(self.accumlatedSentimentalScore,float))        
 
     @classmethod
-    def correspondingGroupElement(cls)->type[CarNewsElement]:
-        return CarNewsElement  
+    def correspondingGroupElement(cls)->type[Car3NewsElement]:
+        return Car3NewsElement  
         
     @classmethod
     def getGroupElement(
         cls,
-        points:list[CarNewsDataPoint])->CarNewsElement: 
-        return  CarNewsElement(points)
+        points:list[Car3NewsDataPoint])->Car3NewsElement: 
+        return  Car3NewsElement(points)
      
                
     
-class CarNewsElement(Element):
+class Car3NewsElement(Element):
     
-    def __init__(self,points:list[CarNewsDataPoint]=[]):
+    def __init__(self,points:list[Car3NewsDataPoint]=[]):
         self.dataPoints = points 
         
     
     @property
-    def dataPoints(self)->list[CarNewsDataPoint]: 
+    def dataPoints(self)->list[Car3NewsDataPoint]: 
         return self._dataPoint
     
     @dataPoints.setter
-    def dataPoints(self,val:list[CarNewsDataPoint]): 
+    def dataPoints(self,val:list[Car3NewsDataPoint]): 
         validPoints = []
         for iPoint in val: 
-            if iPoint.valid() and isinstance(iPoint,CarNewsDataPoint):
+            if iPoint.valid() and isinstance(iPoint,Car3NewsDataPoint):
                 validPoints.append(iPoint)
         self._dataPoint = validPoints            
 
-    @property
-    def visitorHandler(self)->CarNewsVisitorHandler:
+    
+    def getVisitorHandler(self)->CarNewsVisitorHandler:
         return CarNewsVisitorHandler(self)
 
     @classmethod
-    def pointType(cls)->type[CarNewsDataPoint]:
-        return CarNewsDataPoint
+    def pointType(cls)->type[Car3NewsDataPoint]:
+        return Car3NewsDataPoint
                     

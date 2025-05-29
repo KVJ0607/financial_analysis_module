@@ -1,15 +1,20 @@
-from typing import TypeVar, Type, List
-from ..base import Element
+from ..element.base import Element,DataPoint
+from typing import TypeVar
 
-T = TypeVar('T', bound=Element)
+E = TypeVar("E", bound="Element")
 
-class SetOpsMixin:
+class SetOps:
     
-    def __init__(self,dataPoints,elementCls:Type): 
-        self.dataPoints = dataPoints
-        self.elementCls = elementCls
+    def __init__(self,element:E): 
+        self.element = element
     
-    def intersect(self: T, other: T) -> T:
+    def index(self) -> dict[int,DataPoint]: 
+        indexedEle = dict() 
+        for iPoint in self.element.dataPoints: 
+            indexedEle[hash(iPoint)] = iPoint
+        return indexedEle
+    
+    def intersect(self, other: E) -> E:
         """
         Return a new instance containing only DataPoints present in both self and other.
 
@@ -20,14 +25,14 @@ class SetOpsMixin:
             SetOpsMixin: A new instance with intersected DataPoints.
         """
         # Build hash maps for fast lookup
-        self_hashes = {hash(dp): dp for  dp in self.dataPoints}
+        self_hashes = {hash(dp): dp for  dp in self.element.dataPoints}
         other_hashes = {hash(dp): dp for dp in other.dataPoints}
         common_hashes = set(self_hashes) & set(other_hashes)
         intersected_points = [self_hashes[h] for h in common_hashes]
-        return self.elementCls(intersected_points)
+        return type(self.element)(intersected_points)
 
     @staticmethod
-    def intersectMany(*elements: T) -> List[T]:
+    def intersectMany(*elements: E) -> list[E]:
         """
         Return a list of elements, where each element is the intersection of that element
         with all the others in the provided arguments.
@@ -45,12 +50,14 @@ class SetOpsMixin:
             raise ValueError("At least two Element instances are required for intersection.")
 
         result = []
-        hash_maps = [{hash(dp): dp for dp in elem.dataPoints} for elem in elements]
-        for idx, hash_map in enumerate(hash_maps):
-            other_hash_maps = hash_maps[:idx] + hash_maps[idx+1:]
+        hashMaps = [{hash(dp): dp for dp in elem.dataPoints} for elem in elements]
+            
+        for idx, hash_map in enumerate(hashMaps):
+            other_hash_maps = hashMaps[:idx] + hashMaps[idx+1:]
             common_hashes = set(hash_map.keys())
             for other_map in other_hash_maps:
                 common_hashes &= set(other_map.keys())
-            intersected_points = [hash_map[h] for h in common_hashes if hash_map[h].valid()]
+
+            intersected_points = [hash_map[h] for h in common_hashes]
             result.append(type(elements[idx])(intersected_points))
         return result

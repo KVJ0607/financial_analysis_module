@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..element import Element
+
 from abc import ABC, abstractmethod
-from typing import TypeVar 
+
 
 
 
@@ -20,26 +24,17 @@ class Operator(ABC) :
     def getProductClass(cls)->type:
         pass 
         
-        
     @classmethod
     @abstractmethod
-    def match(
-        cls,
-        classA,
-        classB)->bool: 
-        """
-        Check if the two DataCollection are compatible 
-        for the operator. 
-        """
-        pass
-
+    def getOperands(cls)->set:      
+        pass         
 
     @classmethod
     @abstractmethod
     def dot(
         cls,
-        leftOperand,
-        rightOperand):
+        *operand:Element
+        )->Element | None:
         """
         The dot method is a classmethod that acts as a
         operator of Element. It will return a new
@@ -47,20 +42,5 @@ class Operator(ABC) :
         """
         pass
     
-    @classmethod
-    @abstractmethod
-    def getSignatures(cls)->list[set]: 
-        """Return a list of set which act as a signature.
-        Each signature is a set of two type[Element] which
-        can be the operant.
-        """        
-        pass 
+
     
-    @classmethod 
-    def getOperatorforTargetClass(
-        cls,
-        targetClass)->type[Operator]:
-        for subclass in cls.__subclasses__():
-            if targetClass == subclass.getProductClass():
-                return subclass
-        return None

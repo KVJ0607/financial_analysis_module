@@ -1,4 +1,6 @@
 from __future__ import annotations
+from typing import Protocol
+
 from abc import ABC,abstractmethod
 
 from .visitorHandler import VisitorHandler
@@ -69,9 +71,9 @@ class Element(ABC):
         """        
         pass
     
-    @property
+    
     @abstractmethod
-    def visitorHandler(self)->Type[VisitorHandler]:
+    def getVisitorHandler(self)->Type[VisitorHandler]:
         pass
     
     

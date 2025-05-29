@@ -7,7 +7,7 @@ class JsonStrVistor(Visitor):
     
     def visitCarNElement(
         self,
-        cEle:element.CarNElement)->str:
+        cEle:element.Car3Element)->str:
         eleList = []
         for iHash,iCar in cEle.dataPoints: 
             if iCar.valid():
@@ -64,7 +64,7 @@ class JsonStrVistor(Visitor):
     
     def visitCarsNewsElement(
         self,
-        cN_ele:element.CarNewsElement)->str:
+        cN_ele:element.Car3NewsElement)->str:
         
         eleList = []
         for iHash,iCar in cN_ele.dataPoints: 

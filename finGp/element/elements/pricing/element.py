@@ -4,9 +4,7 @@ from __future__ import annotations
 from ...._date_utils import DateRepresentation
 
 from ...base import DataPoint, Element
-from ...helper.non_generator.registry import Registry
 
-from .conversion import PricingConversion
 from .accept import PricingVisitorHandler
 
 class PricingDataPoint(DataPoint): 
@@ -30,6 +28,10 @@ class PricingDataPoint(DataPoint):
             
  
     def __hash__(self): return int("12" + str(self.date).replace('-', ''))
+    
+    @classmethod
+    def hashFromDate(cls, date:DateRepresentation|str)->int:
+        return int("12" + str(date).replace('-', '')) if date else None
     
     @property
     def date(self)->DateRepresentation:
@@ -66,7 +68,7 @@ class PricingDataPoint(DataPoint):
     
 
 
-class PricingElement(Element,PricingConversion):    
+class PricingElement(Element):    
     
     def __init__(self,points:list[PricingDataPoint]=None):
         if points is None: points = []
@@ -81,13 +83,11 @@ class PricingElement(Element,PricingConversion):
     def dataPoints(self, points):
         self._dataPoints = [p for p in points if isinstance(p, PricingDataPoint) and p.valid()]    
     
-    @property    
-    def visitorHandler(self)->PricingVisitorHandler:
+    
+    def getVisitorHandler(self)->PricingVisitorHandler:
         return PricingVisitorHandler(self)
     
     @classmethod    
     def pointType(cls)->type[PricingDataPoint]:
         return PricingDataPoint      
     
-eleReq = Registry.makeElementRequirements({PricingElement})
-Registry.update(PricingConversion.CarNElement,eleReq)    
