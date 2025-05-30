@@ -3,6 +3,7 @@ from .import creator
 
 from .group.group import Group
 from .group.space import Space
+from .operation.operator import Operator
 
 
 
@@ -11,7 +12,8 @@ from .group.space import Space
 
 
 __all__ = ["creator",
-           "Group","Space"]
+           "Group","Space",
+           "Operator"]
 
 
 
