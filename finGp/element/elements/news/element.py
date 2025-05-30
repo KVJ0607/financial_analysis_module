@@ -3,7 +3,7 @@ from __future__ import annotations
 from ...._date_utils import DateRepresentation
 from ...base import DataPoint,Element     
 
-from .accept import NewsVisitorHandler
+
 
 class NewsDataPoint(DataPoint): 
     
@@ -49,6 +49,14 @@ class NewsDataPoint(DataPoint):
         return (DateRepresentation.isValidDateObj(self.date) 
                 and isinstance(self.sentimentalScore,float))
 
+    def toJson(self)->dict:
+        return {
+            "id": self.__hash__(),
+            "type_name": self.__class__.__name__,
+            "date": str(self.date),
+            "siteAddress": self._siteAddress,
+            "sentimentalScore": str(self.sentimentalScore)
+        }
     @classmethod
     def correspondingGroupElement(cls)->type[NewsElement]:
         return NewsElement 
@@ -75,10 +83,8 @@ class NewsElement(Element):
                     validPoints.append(iPoint)
         self._dataPoints = validPoints
 
-    
-    def getVisitorHandler(self)->NewsVisitorHandler:
-        return NewsVisitorHandler(self)
+
 
     @classmethod
-    def pointType(cls)->type[NewsDataPoint]:
+    def getPointType(cls)->type[NewsDataPoint]:
         return NewsDataPoint    

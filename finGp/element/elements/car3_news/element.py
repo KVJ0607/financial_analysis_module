@@ -5,7 +5,7 @@ from ... import DataPoint,Element
 from ...elements.car3.element  import Car3DataPoint
 from ...elements.noneElement import NoneDataPoint
 
-from .accept import CarNewsVisitorHandler
+
     
 class Car3NewsDataPoint(DataPoint):
     def __init__(self,carN:Car3DataPoint,accumlatedSentimentalScore:float=None):
@@ -29,6 +29,15 @@ class Car3NewsDataPoint(DataPoint):
         return (DateRepresentation.isValidDateObj(self.date)
                 and isinstance(self.accumlatedSentimentalScore,float))        
 
+    def toJson(self):
+        return {
+            "id": self.__hash__(),
+            "type_name": self.__class__.__name__,
+            "date": str(self.date),
+            "carN": self.carN.toJson(),
+            "accumlatedSentimentalScore": str(self.accumlatedSentimentalScore)
+        }
+        
     @classmethod
     def correspondingGroupElement(cls)->type[Car3NewsElement]:
         return Car3NewsElement  
@@ -59,11 +68,9 @@ class Car3NewsElement(Element):
                 validPoints.append(iPoint)
         self._dataPoint = validPoints            
 
-    
-    def getVisitorHandler(self)->CarNewsVisitorHandler:
-        return CarNewsVisitorHandler(self)
+
 
     @classmethod
-    def pointType(cls)->type[Car3NewsDataPoint]:
+    def getPointType(cls)->type[Car3NewsDataPoint]:
         return Car3NewsDataPoint
                     

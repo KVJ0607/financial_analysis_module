@@ -4,7 +4,6 @@ from __future__ import annotations
 from ..._date_utils import DateRepresentation
 from ..base import DataPoint,Element
 
-from ..visitorHandler import VisitorHandler
         
 class NoneDataPoint(DataPoint): 
     '''
@@ -36,20 +35,6 @@ class NoneDataPoint(DataPoint):
 
 
 
-class NoneVisitorHandler(VisitorHandler):
-    
-    def __init__(self,element):         
-        self.element = element
-            
-    def acceptVisitor(self,v):
-        return v.visitNoneElement(self.element)    
-
-    
-    def acceptOutVisitor(
-        self,
-        v,
-        dest:str): 
-        return v.visitOutNoneElement(self.element,dest)
     
 
 class NoneElement(Element):    
@@ -64,9 +49,8 @@ class NoneElement(Element):
     def dataPoints(self, points): self._items = []
 
     
-    def getVisitorHandler(self)->NoneVisitorHandler:
-        return NoneVisitorHandler(self)
+
     
     @classmethod
-    def pointType(cls)->type[NoneDataPoint]:
+    def getPointType(cls)->type[NoneDataPoint]:
         return NoneDataPoint

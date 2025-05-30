@@ -14,17 +14,15 @@ firstTractorH.joinGroupTable(newsSentiment)
 firstTractorA.update()
 firstTractorH.update()
 
-csvVisitor = finGp.CsvVistor()    
-firstTractorA.acceptOutVisitor(csvVisitor,"output/firstTractorA_withoutN.csv")
-firstTractorH.acceptOutVisitor(csvVisitor,"output/firstTractorH_withoutN.csv")
+
+firstTractorA.acceptOutVisitor("output/firstTractorA_withoutN.csv")
+firstTractorH.acceptOutVisitor("output/firstTractorH_withoutN.csv")
 
 finGp.Group.normalizeAllGroups(firstTractorA,firstTractorH)
 
 
-
-
-firstTractorA.acceptOutVisitor(csvVisitor,"output/firstTractorA")
-firstTractorH.acceptOutVisitor(csvVisitor,"output/firstTractorH")
+firstTractorA.acceptOutVisitor("output/firstTractorA")
+firstTractorH.acceptOutVisitor("output/firstTractorH")
 
 
 

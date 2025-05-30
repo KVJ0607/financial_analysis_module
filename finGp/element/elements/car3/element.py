@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ...._date_utils import DateRepresentation
 from ...base import DataPoint,Element
-from .accept import Car3VisitorHandler
+
 
 class Car3DataPoint(DataPoint):     
     def __init__(
@@ -61,6 +61,16 @@ class Car3DataPoint(DataPoint):
         else:
             return False
 
+    def toJson(self) -> dict:
+        return {
+            "id": str(self.__hash__()),
+            "type_name": self.__class__.__name__,
+            "date": str(self._date),
+            "previousDate": str(self._previousDate),
+            "followingDate": str(self._followingDate),
+            "cumulativeAbnormalReturn": str(self._cumulativeAbnormalReturn),
+            "intervalN": str(self._intervalN) 
+        }
     
     @classmethod
     def correspondingGroupElement(cls)->type[Car3Element]:
@@ -97,8 +107,7 @@ class Car3Element(Element):
         
   
     
-    def getVisitorHandler(self)->Car3VisitorHandler:
-        return Car3VisitorHandler(self)    
+
     
     @property
     def interval(self)->int:
@@ -113,7 +122,7 @@ class Car3Element(Element):
         self._interval = nDay   
 
     @classmethod
-    def pointType(cls)->type[Car3DataPoint]:
+    def getPointType(cls)->type[Car3DataPoint]:
         return Car3DataPoint
 
 

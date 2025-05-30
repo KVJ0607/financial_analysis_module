@@ -20,12 +20,6 @@ class Space:
     def initDefaultSpaceDefinition(cls):
         cls.initSpaceDefinition(cls._DefAULTSPACE)
         
-    @classmethod
-    def getSpaceDefinition(cls)-> set[type[Element]]:
-        if not cls._SPACE:
-            raise ValueError("Space definition has not been initialized. Please call initDefaultSpaceDefinition() or initSpaceDefinition() first.")
-            
-        return cls._SPACE
     
     @classmethod
     def addSpaceDefinition(cls,component:type[Element]):
@@ -46,6 +40,12 @@ class Space:
             cls._SPACE.add(component)
 
     @classmethod
+    def getSpaceDefinition(cls)->set[type[Element]]:
+        if not cls._SPACE:
+            raise ValueError("Space definition has not been initialized. Please call initDefaultSpaceDefinition() or initSpaceDefinition() first.")
+        return cls._SPACE
+    
+    @classmethod
     def emptySpaceDefinition(cls):
         """
         Empty the current space definition.
@@ -53,6 +53,7 @@ class Space:
         """
 
         cls._SPACE = set(cls._DefAULTSPACE)        
+
     
     def __init__(self):
         if not self._SPACE:
@@ -60,8 +61,23 @@ class Space:
         self._cayleyTable = dict()
         for eleType in self._SPACE:
             self._cayleyTable[eleType] = NoneElement()
-      
+    
+    @property
+    def spaceDefinition(self)->set[type[Element]]:
+        """
+        Get the space definition of the group.
         
+        Returns:
+            set: A set containing the types of elements in the group space.
+        """
+        return self._SPACE      
+        
+    
+    @property
+    def cayleyTable(self)->dict[type[Element], Element]:
+        return self._cayleyTable
+    
+    
         
     def setCayleyElement(self,ele: Element): 
         if not isinstance(ele,Element): 
@@ -72,8 +88,6 @@ class Space:
         
         self._cayleyTable[type(ele)] = ele
     
-    def getCayleyTable(self)->dict[type[Element], Element]:
-        return self._cayleyTable
     
 
     def getValuedSupgroup(self)-> dict[type[Element], Element]:

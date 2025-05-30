@@ -1,16 +1,15 @@
 from .base import DataPoint,Element
 
-from .visitorHandler import VisitorHandler
 
 from .elements.noneElement import NoneElement,NoneDataPoint
 from .elements.car3.element import Car3Element,Car3DataPoint
 from .elements.car3_news.element import Car3NewsElement,Car3NewsDataPoint
 from .elements.news.element import NewsElement,NewsDataPoint
 from .elements.pricing.element import PricingElement,PricingDataPoint
-from .visitorHandler import VisitorHandler
+
 
 __all__ = [
-    "DataPoint","Element","VisitorHandler",
+    "DataPoint","Element",
     "Conversion",
     "Registry",
     "NoneElement","NoneDataPoint",

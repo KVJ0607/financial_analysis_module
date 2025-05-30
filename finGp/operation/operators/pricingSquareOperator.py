@@ -59,8 +59,8 @@ class PricingSquareOperator(Operator):
                         lastDay,
                         nextDay,
                         iDay,
-                        (nextPoint.adjClose - lastPoint.adjClose) / lastPoint.adjClose,
-                        3)
+                        (nextPoint.adjClose - lastPoint.adjClose) / lastPoint.adjClose
+                        )
                     )
         return Car3Element(carNPoints) 
         

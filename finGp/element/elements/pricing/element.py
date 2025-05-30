@@ -5,7 +5,8 @@ from ...._date_utils import DateRepresentation
 
 from ...base import DataPoint, Element
 
-from .accept import PricingVisitorHandler
+
+ 
 
 class PricingDataPoint(DataPoint): 
     def __init__(
@@ -17,7 +18,9 @@ class PricingDataPoint(DataPoint):
         close:str|float=None,
         adjClose:str|float=None,
         volume:str|float=None):   
-                    
+        
+                            
+        
         self.date = date
         self._open = open 
         self._high = high 
@@ -52,6 +55,19 @@ class PricingDataPoint(DataPoint):
     def valid(self)->bool:   
         return DateRepresentation.isValidDateObj(self.date) and self.adjClose is not None and isinstance(self.adjClose, float)        
 
+    def toJson(self):
+        return {
+            "id": self.__hash__(),
+            "type_name": self.__class__.__name__,
+            "date": str(self.date),
+            "open": self._open,
+            "high": self._high,
+            "low": self._low,
+            "close": self._close,
+            "adjClose": self._adjClose,
+            "volume": self._volume
+        }
+    
     @classmethod
     def correspondingGroupElement(cls)->type[PricingElement]:
         return PricingElement      
@@ -83,11 +99,9 @@ class PricingElement(Element):
     def dataPoints(self, points):
         self._dataPoints = [p for p in points if isinstance(p, PricingDataPoint) and p.valid()]    
     
-    
-    def getVisitorHandler(self)->PricingVisitorHandler:
-        return PricingVisitorHandler(self)
+
     
     @classmethod    
-    def pointType(cls)->type[PricingDataPoint]:
+    def getPointType(cls)->type[PricingDataPoint]:
         return PricingDataPoint      
     

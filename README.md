@@ -12,19 +12,19 @@ A modular Python package for advanced financial data analysis, supporting event 
   Abstract base classes for `DataPoint` and `Element` to represent financial data and their groupings.
 
 - **Group Operations:**  
-  The `Group` class supports Cayley table logic, group normalization, and joining of different data collections.
+  The `Group` class supports Cayley table logic, group normalization.
 
-- **Extensible Visitor Pattern:**  
-  Easily export or process data in various formats (CSV, JSON, etc.) using the visitor pattern.
+<!-- - **Extensible Visitor Pattern:**  
+  Easily export or process data in various formats (CSV, JSON, etc.) using the visitor pattern. -->
 
-- **Event Study Support:**  
+- **Basic Element Support:**  
   Built-in support for event windows, abnormal returns, and news sentiment integration.
 
-- **Flexible Registry System:**  
-  Register and manage custom element types and requirements for extensibility.
+- **Flexible Space Definition:**  
+  Add or remove custom element types by updating the `Space` definition.
 
-- **CSV Data Import:**  
-  Use `PricingCollectionCreator` and `NewsCollectionCreator` to load pricing and news sentiment data from CSV files with customizable column mapping.
+<!-- - **CSV Data Import:**  
+  Use `PricingCollectionCreator` and `NewsCollectionCreator` to load pricing and news sentiment data from CSV files with customizable column mapping. -->
 
 ---
 
@@ -44,6 +44,10 @@ pip install -r requirements.txt
 
 ```python
 import finGp
+from scipy import stats
+
+# Initialize the default space definition
+finGp.Space.initDefaultSpaceDefinition()
 
 # Load pricing and news data
 firstTractorH = finGp.creator.PricingCollectionCreator.getInstacnefromCsv(
@@ -61,12 +65,16 @@ firstTractorH.joinGroupTable(newsSentiment)
 firstTractorA.update()
 firstTractorH.update()
 
-# Export results
-csvVisitor = finGp.CsvVistor()
-firstTractorA.acceptOutVisitor(csvVisitor, "output/firstTractorA.csv")
-firstTractorH.acceptOutVisitor(csvVisitor, "output/firstTractorH.csv")
+# Export results (without normalization)
+firstTractorA.acceptOutVisitor(csvVisitor, "output/firstTractorA_withoutN.csv")
+firstTractorH.acceptOutVisitor(csvVisitor, "output/firstTractorH_withoutN.csv")
 
-print("done")
+# Normalize groups
+finGp.Group.normalizeAllGroups(firstTractorA, firstTractorH)
+
+# Export results (after normalization)
+firstTractorA.acceptOutVisitor(csvVisitor, "output/firstTractorA")
+firstTractorH.acceptOutVisitor(csvVisitor, "output/firstTractorH")
 ```
 
 ---
@@ -88,6 +96,32 @@ newsSentiment = finGp.creator.NewsCollectionCreator.getInstacnefromCsv(
 
 ---
 
+## Adding or Removing Element Types
+
+To add a new element type, **update the space definition** using the `Space` class:
+
+```python
+from finGp.group.space import Space
+from finGp.element.elements.myNewElement import MyNewElement
+
+# Add your new element type to the space definition
+Space.addSpaceDefinition(MyNewElement)
+```
+
+To remove an element type:
+
+```python
+Space.removeSpaceDefinition(MyNewElement)
+```
+
+You can also re-initialize the space with a custom set of element types:
+
+```python
+Space.initSpaceDefinition({MyNewElement, AnotherElement, ...})
+```
+
+---
+
 ## Package Structure
 
 ```
@@ -102,7 +136,7 @@ finGp/
             newsCollectionCreator.py
             pricingCollectionCreator.py
     element/
-    group_vistor/
+    
 example_data/
     hshare/
     ashare/
@@ -113,7 +147,6 @@ output/
 - **element/**: Core data models (`DataPoint`, `Element`), element types (pricing, news, etc.), and set/convert helpers.
 - **group.py**: The main `Group` class for managing and operating on collections of elements.
 - **creator/creators/**: Utilities for loading data from CSV and other sources.
-- **group_vistor/**: Visitor pattern implementations for exporting or processing groups.
 - **_operator/**: Operator classes for combining elements (e.g., pricing + news).
 
 ---
@@ -122,12 +155,9 @@ output/
 
 - **Add a new Element type:**  
   1. Subclass `Element` and `DataPoint` in `element/elements/`.
-  2. Register your new class in the registry.
+  2. Update the space definition using `Space.addSpaceDefinition(MyNewElement)`.
   3. Optionally, implement a visitor for export.
 
-- **Add a new Visitor:**  
-  1. Subclass `Visitor` in `group_vistor/visitor.py`.
-  2. Implement the required visit methods.
 
 ---
 

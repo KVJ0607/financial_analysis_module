@@ -1,16 +1,16 @@
 from __future__ import annotations
-from typing import Protocol
+from typing import Protocol,Iterator
 
 from abc import ABC,abstractmethod
 
-from .visitorHandler import VisitorHandler
+
 
 from typing import Type, TypeVar
 T = TypeVar("T", bound="DataPoint")
 E = TypeVar("E", bound="Element")
 
 
-from .._date_utils.dateRepresentation import DateRepresentation
+from .._date_utils import DateRepresentation
 
 class DataPoint(ABC):        
 
@@ -30,13 +30,29 @@ class DataPoint(ABC):
     @abstractmethod
     def date(self)->DateRepresentation:
         pass
-          
-
+              
+    
                 
-    @abstractmethod
     def valid(self)->bool:  
-        pass 
+        return True 
 
+
+ 
+    def toJson(self) -> dict:
+        """
+        Return a dictionary of all user-defined attributes (excluding private and built-in).
+        Always includes 'id' and 'type_name' keys.
+        """
+        result = {
+            "id": self.__hash__(),
+            "type_name": self.__class__.__name__,
+        }
+        # Add all user-defined (non-private, non-callable) attributes
+        for key, value in self.__dict__.items():
+            if not key.startswith("_") and key not in result:
+                result[key] = value
+        return result    
+    
     @classmethod
     @abstractmethod
     def correspondingGroupElement(cls)->type[E]:                        
@@ -47,7 +63,7 @@ class DataPoint(ABC):
     def getGroupElement(cls,points:list[T])->E: 
         pass 
     
-
+    
 
 
 
@@ -55,12 +71,21 @@ class DataPoint(ABC):
 
 class Element(ABC): 
 
+    
+    @abstractmethod
+    def __init__(self):
+        pass 
+
+    def __iter__(self)-> Iterator[DataPoint]:        
+        return iter(self.dataPoints)
+    
     def __len__(self): 
         """
         Return the number of DataPoint
         """    
         return len(self.dataPoints)
-                            
+    
+                                
 
     @property
     @abstractmethod
@@ -71,15 +96,12 @@ class Element(ABC):
         """        
         pass
     
-    
-    @abstractmethod
-    def getVisitorHandler(self)->Type[VisitorHandler]:
-        pass
+
     
     
     @classmethod
     @abstractmethod
-    def pointType(cls)->Type[T]: 
+    def getPointType(cls)->Type[T]: 
         pass                                 
 
 

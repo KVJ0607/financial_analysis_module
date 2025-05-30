@@ -18,7 +18,6 @@ class Group:
     It supports operations such as expanding the group, joining groups, and normalizing
     multiple groups.
     """
-    _spaceCls = Space
     _operationTableCls = operation.OperationTable
     
     def __init__(
@@ -52,7 +51,7 @@ class Group:
 
 
     def update(self): 
-        for iClass in self._space.getValuedSupgroup().keys():
+        for iClass in self._space.spaceDefinition:
             self._getElementByType(iClass)    
     
 
@@ -73,24 +72,33 @@ class Group:
                             not {type(groupB)}""")
 
         elementsToBeUpdates = []
-        for key, value in groupB._space.getCayleyTable().items():
+        for key, value in groupB._space.cayleyTable.items():
             if value and key not in self._space.getValuedSupgroup():
                 elementsToBeUpdates.append(value)
         for ele in elementsToBeUpdates:
             self._space.setCayleyElement(ele)
 
-        
-    def acceptVisitor(self,v): 
-        for iClass,iEle in self._space.getValuedSupgroup().items(): 
-            iEle.getVisitorHandler().acceptVisitor(v)
     
-    def acceptOutVisitor(self, v, destDir:str):
+
+            
+    def acceptOutVisitor(self, v, destDir: str):
         import os
+        import csv
         destDir = os.path.splitext(destDir)[0]
         os.makedirs(destDir, exist_ok=True)
         for iClass, iEle in self._space.getValuedSupgroup().items():
-            destVar = os.path.join(destDir, iClass.__name__)
-            iEle.getVisitorHandler().acceptOutVisitor(v, destVar)
+            destVar = os.path.join(destDir, iClass.__name__ + ".csv")
+            with open(destVar, mode='w', newline='', encoding='utf-8') as csvfile:
+                writer = None
+                for iPoint in iEle:
+                    iDict = iPoint.toJson()
+                    if writer is None:
+                        writer = csv.DictWriter(csvfile, fieldnames=iDict.keys())
+                        writer.writeheader()
+                    writer.writerow(iDict)
+                
+                
+                
 
     def _getElementByType(self, elementType: type[Element],depth:int = 0) -> Element | None:
         MAX_DEPTH = 10
@@ -106,19 +114,19 @@ class Group:
             Element: An instance of the specified element type, or None if not found.
         """
         
-        if not isinstance(elementType, type) or not elementType in self._space.getSpaceDefinition():
+        if not isinstance(elementType, type) or not elementType in self._space.spaceDefinition:
             raise TypeError(f"{elementType} is not a valid element type in the group space definition.")
         
         # Retrive element from the Cayley table
         if elementType in self._space.getValuedSupgroup():            
-            return self._space.getCayleyTable()[elementType]
+            return self._space.cayleyTable[elementType]
         
         # If not found, resort to operation table
         for productClass, tableMember in self._operationTableCls.getOperationTable().items():
             if (productClass == elementType):
                 if tableMember.getOperands().issubset(self._space.getValuedSupgroup()):
                     targetElement = tableMember.getOperator().dot(
-                        *[self._space.getCayleyTable()[iClass] for iClass in tableMember.getOperands()]
+                        *[self._space.cayleyTable[iClass] for iClass in tableMember.getOperands()]
                     )
                     self._space.setCayleyElement(targetElement)                    
                     return targetElement
@@ -131,7 +139,7 @@ class Group:
                             break
                     if allOperandsFound:
                         targetElement = tableMember.getOperator().dot(
-                            *[self._space.getCayleyTable()[iClass] for iClass in tableMember.getOperands()]
+                            *[self._space.cayleyTable[iClass] for iClass in tableMember.getOperands()]
                         )
                         self._space.setCayleyElement(targetElement)                    
                         return targetElement
@@ -140,7 +148,7 @@ class Group:
     
     @classmethod
     def getSpaceDefinitionCls(cls) -> type[Space]:
-        return cls._spaceCls
+        return Space
     
     @classmethod
     def normalizeAllGroups(
@@ -158,7 +166,7 @@ class Group:
             
         for iClass in commonValuedGroups:            
             goodElements = SetOps.intersectMany(
-                *[x._getElementByType(iClass) for x in groups if x._space.getCayleyTable()[iClass]]
+                *[x._getElementByType(iClass) for x in groups if x._space.cayleyTable[iClass]]
                 )            
             
             for j,jGroup in enumerate(groups):

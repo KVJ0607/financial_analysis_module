@@ -15,8 +15,7 @@ class OperationTable:
     
     @classmethod
     def getSpaceDefinition(cls):
-        return cls._SPACE.getSpaceDefinition()
-    
+        return cls._SPACE.getSpaceDefinition()    
     
     @classmethod
     def getDefaultOperationDefinition(cls):
