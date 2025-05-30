@@ -81,7 +81,7 @@ class Group:
     
 
             
-    def acceptOutVisitor(self, v, destDir: str):
+    def acceptOutVisitor(self, destDir: str):
         import os
         import csv
         destDir = os.path.splitext(destDir)[0]
